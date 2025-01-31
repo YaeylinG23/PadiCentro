@@ -51,7 +51,7 @@ def login():
             cursor.execute(query, (nombre, contrasena))  
             # Ejecuta la consulta, previniendo inyecciones SQL con parámetros.
             usuario = cursor.fetchone()  
-            # Obtiene el primer resultado (si existe).
+            # Obtiene el primer resultado (si existe). fetchone recupera una sola fila del resultado
             if usuario:  
                 # Si el usuario existe en la base de datos:
                 session['usuario'] = nombre  

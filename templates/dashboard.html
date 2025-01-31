@@ -1,44 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 0;
+            font-family: Arial, sans-serif;
         }
-        header {
+
+        body, html {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-blue {
+            background: #014CB9;
+            color: #F9D007;
+            text-align: center;
+            font-weight: bold;
+            font-size: 23px;
+            padding: 25px;
+        }
+
+        .top-bar {
+            background: #4DAD33;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #007BFF;
-            padding: 10px 20px;
+            padding: 19px 50px;
             color: white;
+            position: relative; /* Asegura que el logo se posicione respecto a esta barra */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Sombra sutil */
         }
-        a {
-            color: white;
-            text-decoration: none;
+
+        .logo-container {
+            position: absolute;
+            top: -78px; /* Ajusta la posición sobre la barra */
+            left: 8%;
+            transform: translateX(-50%);
+            padding: 10px;
+            z-index: 10;
+        }
+
+        .logo-container img {
+            height: 200px; /* Ajusta el tamaño */
+            width: 200px;
+        }
+
+        .welcome-text {
+            flex: 1;
+            text-align: left;
             font-weight: bold;
+            font-size: 20px;
+            margin-left: 190px; /* Ajusta si es necesario */
         }
-        a:hover {
-            text-decoration: underline;
+
+        .logout-button {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
         }
-        main {
-            margin: 20px 0;
+        
+
+        .content {
+            padding: 20px;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .decorations {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .decorations img {
+            position: fixed; 
+            width: 170px; /* Ajusta el tamaño según necesidad */
+            z-index: 1; /* Asegura que las decoraciones estén sobre los demás elementos */
+        }
+        
+        /* Ajusta las posiciones para pegarlas a las esquinas */
+        .top-left { left: 5px; top: 205px;}
+        .top-right { right: 0px; top: 200px; }
+        .bottom-left { left: 0; bottom: 0; }
+        .bottom-right { right: 0px; bottom: 0px; }
+
+        /* Rotar las imágenes */
+        .top-right { transform: scaleY(-1); } 
+        .bottom-left { transform: rotate(180deg) scaleY(-1);} /* Gira 180° y voltea */
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 35px; /* Aumenta el espacio entre los botones */
+            margin-top: 20px;
+        }
+
+        .button-container a {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            position: relative; /* Para posicionar los hexágonos */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Sombra debajo del botón */
+            transition: box-shadow 0.3s ease; /* Transición suave para el hover */
+        }
+
+        /* Colores personalizados para los botones */
+        .btn-custom-1 {
+            background-color: #F9D007; /* Amarillo */
+            border: 1px solid #F9D007;
+        }
+
+        .btn-custom-2 {
+            background-color: #014CB9; /* Azul */
+            border: 1px solid #014CB9;
+        }
+
+        .btn-custom-3 {
+            background-color: #4DAD33; /* Verde */
+            border: 1px solid #4DAD33;
+        }
+
+        /* Efecto hover para los botones */
+        .btn-custom-1:hover {
+            background-color: #e0b906;
+            border-color: #e0b906;
+        }
+
+        .btn-custom-2:hover {
+            background-color: #013a8a;
+            border-color: #013a8a;
+        }
+
+        .btn-custom-3:hover {
+            background-color: #3d8c27;
+            border-color: #3d8c27;
+        }
+
+        /* Estilos para el hexágono base */
+        .button-container a::before {
+            content: "";
+            width: 90px;
+            height: 80px;
+            background-color: inherit;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            position: absolute;
+            top: -10px;
+            left: 5%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        /* Estilos para el hexágono blanco */
+        .button-container a::after {
+            content: "";
+            width: 80px; /* Un poco más pequeño que el hexágono base */
+            height: 70px;
+            background-color: white; /* Color blanco */
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            position: absolute;
+            top: -5px; /* Ajusta la posición para que esté encima */
+            left: 5%;
+            transform: translateX(-50%);
+            z-index: 3; /* Asegura que esté por encima del hexágono base */
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Bienvenido, {{ nombre }}</h1>
-        <a href="/logout">Cerrar sesión</a>
-    </header>
-    <main>
-        <p>Esta es la página de dashboard. Aquí puedes agregar contenido dinámico según los permisos del usuario.</p>
-    </main>
+
+    <!--Navbar-->
+    <div class="dashboard-container">
+        <div class="header-blue">
+            MI DISCIPLINA Y PASIÓN ME DAN LA OPORTUNIDAD DE <br> CAMBIAR LA VIDA DE MILES DE PERSONAS, INCLUYENDO LA MÍA.
+        </div>
+        <div class="top-bar">
+            <div class="logo-container">
+                <img src="./static/img/logo_prin.png" alt="Logo">
+            </div>
+            <span class="welcome-text"></span>
+            <a href="login.html" class="logout-button">Cerrar sesión</a>
+        </div>
+
+    <!-- Contenido del dashboard -->
+        <div class="content">
+            <div class="decorations">
+                <img src="./static/img/decoración_l.png" class="top-left" alt="Decoración Superior Izquierda">
+                <img src="./static/img/decoración.png" class="top-right" alt="Decoración Superior Derecha">
+                <img src="./static/img/decoración.png" class="bottom-left" alt="Decoración Inferior Izquierda">
+                <img src="./static/img/decoración.png" class="bottom-right" alt="Decoración Inferior Derecha">
+            </div>
+
+            <!-- Botones con hexágono e ícono -->
+            <div class="button-container">
+                <a href="#" class="btn-custom-1">
+                    <i class="fas fa-file-alt"></i> <!-- Ícono de Font Awesome -->
+                    Solicitud de permisos
+                </a>
+                <a href="#" class="btn-custom-2">
+                    <i class="fas fa-check-circle"></i> <!-- Ícono de Font Awesome -->
+                    Estatus del permiso
+                </a>
+                <a href="#" class="btn-custom-3">
+                    <i class="fas fa-sun"></i> <!-- Ícono de Font Awesome -->
+                    Solicitud de vacaciones
+                </a>
+                <a href="#" class="btn-custom-2">
+                    <i class="fas fa-calendar-check"></i> <!-- Ícono de Font Awesome -->
+                    Estatus de vacaciones
+                </a>
+                <a href="#" class="btn-custom-2">
+                    <i class="fas fa-history"></i> <!-- Ícono de Font Awesome -->
+                    Historial de vacaciones
+                </a>
+            </div>
+    </div>
 </body>
 </html>

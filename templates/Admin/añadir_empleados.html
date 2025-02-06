@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Añadir empleados</title>
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header-blue {
+            background: #014CB9;
+            color: #F9D007;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .top-bar {
+            background: #4DAD33;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            color: white;
+            position: relative;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .welcome-text {
+            position: relative;
+            top: -40px; /* Ajusta el valor según sea necesario */
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .logo-container {
+            position: absolute;
+            top: -5rem;
+            left: 8%;
+            transform: translateX(-50%);
+            padding: 1rem;
+            z-index: 3;
+        }
+
+        .logo-container img {
+            height: 10rem;
+            width: 10rem;
+        }
+
+        .logout-button {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 7rem;
+            position: relative;
+        }
+
+        /* Estilos para los botones */
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .button-container > a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: .5rem 1.2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            color: black;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border: 4px solid; /* Borde más grueso */
+        }
+
+        .button-container > a i {
+            margin-left: 0.5rem; /* Icono a la derecha */
+            font-size: 1.2rem;
+        }
+
+        .btn-custom-1 {
+            background-color: rgb(255, 255, 255);
+            border-color: #4DAD33 !important; /* Borde verde */
+        }
+
+        .btn-custom-1:hover {
+            background-color: #4DAD33; /* Fondo verde al hacer hover */
+            color: white; /* Texto blanco al hacer hover */
+            transform: translateY(-2px);
+        }
+
+        .btn-custom-3 {
+            background-color: rgb(255, 255, 255);
+            border-color: #F9D007 !important; /* Borde amarillo */
+        }
+
+        .btn-custom-3:hover {
+            background-color: #F9D007; /* Fondo amarillo al hacer hover */
+            color: white; /* Texto negro al hacer hover */
+            transform: translateY(-2px);
+        }
+
+        /* Contenedor de la tabla */
+        .table-wrapper {
+            background: white;
+            border: 4px solid #014CB9; /* Borde amarillo */
+            border-radius: 50px; /* Bordes redondeados */
+            padding: 1rem;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Evita que la tabla sobresalga */
+        }
+
+        /* Estilos para la tabla */
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 20px; /* Bordes redondeados */
+            overflow: hidden;
+        }
+
+        .table-custom thead {
+            background-color: #D9D9D9;
+            color: black;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table-custom tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Redondear esquinas superiores */
+        .table-custom thead tr:first-child th:first-child {
+            border-top-left-radius: 20px;
+        }
+        .table-custom thead tr:first-child th:last-child {
+            border-top-right-radius: 20px;
+        }
+
+        /* Redondear esquinas inferiores */
+        .table-custom tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 20px;
+        }
+        .table-custom tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 20px;
+        }
+
+        /* Decoraciones */
+        .decorations {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .decorations img {
+            position: fixed;
+            width: 10rem;
+            z-index: 1;
+        }
+
+        .top-left { left: 5px; top: 12rem; }
+        .top-right { right: 0px; top: 12rem; }
+        .bottom-left { left: 0; bottom: 0; }
+        .bottom-right { right: 0px; bottom: 0px; }
+
+        .top-right { transform: scaleY(-1); }
+        .bottom-left { transform: rotate(180deg) scaleY(-1); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+            }
+
+            .button-container a {
+                width: 100%;
+            }
+        }
+
+        /* Estilo del modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro */
+        }
+
+        /* Contenido del modal */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        /* Botón para cerrar el modal */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        /* Contenedor del menú desplegable */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Contenido del menú desplegable */
+        .dropdown-content {
+            display: none; /* Oculto por defecto */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        /* Estilo de los enlaces dentro del menú */
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Cambiar color al pasar el ratón sobre los enlaces */
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Mostrar el menú desplegable */
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!--Navbar-->
+    <div class="dashboard-container">
+        <div class="header-blue">
+            MI DISCIPLINA Y PASIÓN ME DAN LA OPORTUNIDAD DE <br> CAMBIAR LA VIDA DE MILES DE PERSONAS, INCLUYENDO LA MÍA.
+        </div>
+        <div class="top-bar">
+            <div class="logo-container">
+                <img src="./static/img/logo_prin.png" alt="Logo">
+            </div>
+            <span class="welcome-text"></span>
+            <a href="#" class="logout-button" onclick="confirmLogout()">Cerrar sesión</a>
+        </div>
+
+        <!-- Contenido del dashboard -->
+        <div class="content">
+            <div class="decorations">
+                <img src="./static/img/decoración_l.png" class="top-left" alt="Decoración Superior Izquierda">
+                <img src="./static/img/decoración.png" class="top-right" alt="Decoración Superior Derecha">
+                <img src="./static/img/decoración.png" class="bottom-left" alt="Decoración Inferior Izquierda">
+                <img src="./static/img/decoración.png" class="bottom-right" alt="Decoración Inferior Derecha">
+            </div>
+
+            <h1 class="welcome-text">Empleados</h1>
+
+            <!-- Botón de despliegue -->
+            <div class="button-container">
+                <!-- Botón que abre el menú desplegable -->
+                <a href="#" class="btn-custom-3" id="dropdownBtn">
+                    Seleccionar Empleado <i class="fas fa-users"></i>
+                </a>
+                <!-- Menú desplegable -->
+                <div id="dropdownContent" class="dropdown-content">
+                    <a href="#">Opción 1</a>
+                    <a href="#">Opción 2</a>
+                    <a href="#">Opción 3</a>
+                </div>
+            </div>
+
+            <!--Botón modal-->
+            <div class="button-container">
+                <!-- Botón para abrir el modal -->
+                <a href="#" class="btn-custom-1" id="openModalBtn">
+                    Agregar Empleado <i class="fas fa-user-plus"></i>
+                </a>                
+
+                <!-- El modal -->
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <p>¡Este es un modal de ejemplo!</p>
+                    </div>
+                </div>
+            
+            </div>
+
+            <!-- Contenedor de la tabla -->
+            <div class="table-wrapper">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Nombre completo</th>
+                            <th>Usuario</th>
+                            <th>Contraseña</th>
+                            <th>E-mail</th>
+                            <th>Departamento</th>
+                            <th>Fecha de contratación</th>
+                            <th>Dirección</th>
+                            <th>No. Teléfono</th>
+                            <th>Fecha de nacimiento</th>
+                            <th>Horario de entrada</th>
+                            <th>Horario de salida</th>
+                            <th>Días de trabajo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!--Script para cerrar sesión-->
+    <script>
+        function confirmLogout() {
+            const confirmLogout = confirm("¿Estás seguro de que quieres cerrar sesión?");
+            if (confirmLogout) {
+                window.location.href = "{{ url_for('logout') }}";
+            } else {
+                return false;
+            }
+        }
+    </script>
+
+    <!--Script para que el usuario regrese al dashboard con el botón "Atrás"-->
+    <script>
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
+    </script>
+    
+    <!--Script para el modal-->
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const openModalBtn = document.getElementById('openModalBtn');
+        const modal = document.getElementById('myModal');
+        const closeBtn = document.querySelector('.close');
+
+        // Abrir el modal cuando se hace clic en el botón
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+        });
+
+        // Cerrar el modal cuando se hace clic en la "X"
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Cerrar el modal si se hace clic fuera del contenido del modal
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+
+
+    <!--Script para el botón desplegable-->
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const dropdownBtn = document.getElementById('dropdownBtn');
+        const dropdownContent = document.getElementById('dropdownContent');
+
+        // Mostrar u ocultar el menú desplegable al hacer clic en el botón
+        dropdownBtn.addEventListener('click', () => {
+            dropdownContent.classList.toggle('show');
+        });
+
+        // Cerrar el menú desplegable si se hace clic fuera de él
+        window.addEventListener('click', (event) => {
+            if (!event.target.matches('#dropdownBtn')) {
+                if (dropdownContent.classList.contains('show')) {
+                    dropdownContent.classList.remove('show');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

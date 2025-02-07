@@ -6,303 +6,8 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_añadirEmpleado.css') }}">
     <title>Añadir empleados</title>
-    <style>
-        /* Estilos generales */
-        * {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        body, html {
-            width: 100%;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-
-        .dashboard-container {
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .header-blue {
-            background: #014CB9;
-            color: #F9D007;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .top-bar {
-            background: #4DAD33;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            color: white;
-            position: relative;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-            z-index: 2;
-        }
-
-        .welcome-text {
-            position: relative;
-            top: -40px; /* Ajusta el valor según sea necesario */
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .logo-container {
-            position: absolute;
-            top: -5rem;
-            left: 8%;
-            transform: translateX(-50%);
-            padding: 1rem;
-            z-index: 3;
-        }
-
-        .logo-container img {
-            height: 10rem;
-            width: 10rem;
-        }
-
-        .logout-button {
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-            z-index: 2;
-        }
-
-        .content {
-            padding: 7rem;
-            position: relative;
-        }
-
-        /* Estilos para los botones */
-        .button-container {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .button-container > a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: .5rem 1.2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            color: black;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            border: 4px solid; /* Borde más grueso */
-        }
-
-        .button-container > a i {
-            margin-left: 0.5rem; /* Icono a la derecha */
-            font-size: 1.2rem;
-        }
-
-        .btn-custom-1 {
-            background-color: rgb(255, 255, 255);
-            border-color: #4DAD33 !important; /* Borde verde */
-        }
-
-        .btn-custom-1:hover {
-            background-color: #4DAD33; /* Fondo verde al hacer hover */
-            color: white; /* Texto blanco al hacer hover */
-            transform: translateY(-2px);
-        }
-
-        .btn-custom-3 {
-            background-color: rgb(255, 255, 255);
-            border-color: #F9D007 !important; /* Borde amarillo */
-        }
-
-        .btn-custom-3:hover {
-            background-color: #F9D007; /* Fondo amarillo al hacer hover */
-            color: white; /* Texto negro al hacer hover */
-            transform: translateY(-2px);
-        }
-
-        /* Contenedor de la tabla */
-        .table-wrapper {
-            background: white;
-            border: 4px solid #014CB9; /* Borde amarillo */
-            border-radius: 50px; /* Bordes redondeados */
-            padding: 1rem;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* Evita que la tabla sobresalga */
-        }
-
-        /* Estilos para la tabla */
-        .table-custom {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 20px; /* Bordes redondeados */
-            overflow: hidden;
-        }
-
-        .table-custom thead {
-            background-color: #D9D9D9;
-            color: black;
-        }
-
-        .table-custom th,
-        .table-custom td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .table-custom tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .table-custom tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Redondear esquinas superiores */
-        .table-custom thead tr:first-child th:first-child {
-            border-top-left-radius: 20px;
-        }
-        .table-custom thead tr:first-child th:last-child {
-            border-top-right-radius: 20px;
-        }
-
-        /* Redondear esquinas inferiores */
-        .table-custom tbody tr:last-child td:first-child {
-            border-bottom-left-radius: 20px;
-        }
-        .table-custom tbody tr:last-child td:last-child {
-            border-bottom-right-radius: 20px;
-        }
-
-        /* Decoraciones */
-        .decorations {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-        }
-
-        .decorations img {
-            position: fixed;
-            width: 10rem;
-            z-index: 1;
-        }
-
-        .top-left { left: 5px; top: 12rem; }
-        .top-right { right: 0px; top: 12rem; }
-        .bottom-left { left: 0; bottom: 0; }
-        .bottom-right { right: 0px; bottom: 0px; }
-
-        .top-right { transform: scaleY(-1); }
-        .bottom-left { transform: rotate(180deg) scaleY(-1); }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .button-container {
-                flex-direction: column;
-            }
-
-            .button-container a {
-                width: 100%;
-            }
-        }
-
-        /* Estilo del modal */
-        .modal {
-            display: none; /* Oculto por defecto */
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro */
-        }
-
-        /* Contenido del modal */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        /* Botón para cerrar el modal */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-        }
-
-        /* Contenedor del menú desplegable */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        /* Contenido del menú desplegable */
-        .dropdown-content {
-            display: none; /* Oculto por defecto */
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        /* Estilo de los enlaces dentro del menú */
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-
-        /* Cambiar color al pasar el ratón sobre los enlaces */
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Mostrar el menú desplegable */
-        .show {
-            display: block;
-        }
-    </style>
 </head>
 <body>
 
@@ -315,21 +20,22 @@
             <div class="logo-container">
                 <img src="./static/img/logo_prin.png" alt="Logo">
             </div>
-            <span class="welcome-text"></span>
+            <span class="welcome-text" onclick="window.location.href='{{ url_for('dashboard_admin') }}'" style="cursor: pointer;">Regresar</span>
             <a href="#" class="logout-button" onclick="confirmLogout()">Cerrar sesión</a>
         </div>
 
-        <!-- Contenido del dashboard -->
-        <div class="content">
+        <div>
             <div class="decorations">
                 <img src="./static/img/decoración_l.png" class="top-left" alt="Decoración Superior Izquierda">
                 <img src="./static/img/decoración.png" class="top-right" alt="Decoración Superior Derecha">
                 <img src="./static/img/decoración.png" class="bottom-left" alt="Decoración Inferior Izquierda">
                 <img src="./static/img/decoración.png" class="bottom-right" alt="Decoración Inferior Derecha">
             </div>
+        </div>
 
-            <h1 class="welcome-text">Empleados</h1>
-
+        <!-- Contenido del dashboard -->
+        <div class="content">
+            <h1 class="welcome-text2">Empleados</h1><br>
             <!-- Botón de despliegue -->
             <div class="button-container">
                 <!-- Botón que abre el menú desplegable -->
@@ -342,10 +48,7 @@
                     <a href="#">Opción 2</a>
                     <a href="#">Opción 3</a>
                 </div>
-            </div>
-
-            <!--Botón modal-->
-            <div class="button-container">
+            
                 <!-- Botón para abrir el modal -->
                 <a href="#" class="btn-custom-1" id="openModalBtn">
                     Agregar Empleado <i class="fas fa-user-plus"></i>
@@ -355,7 +58,101 @@
                 <div id="myModal" class="modal">
                     <div class="modal-content">
                         <span class="close">&times;</span>
-                        <p>¡Este es un modal de ejemplo!</p>
+                        <h2>Registrar empleado</h2>
+                         <!-- Formulario dentro del modal -->
+                            <form id="empleadoForm">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre Completo:</label>
+                                    <input type="text" id="nombre" name="nombre" placeholder="Ingresa el nombre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nacimiento">Fecha de nacimiento:</label>
+                                    <input type="date" id="nacimiento" name="nacimiento" placeholder="Ingresa la fecha de nacimiento" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="direccion">Dirección:</label>
+                                    <input type="text" id="direccion" name="direccion" placeholder="Ingresa la dirección" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="tel" id="telefono" maxlength="10" name="telefono" placeholder="Ingresa el teléfono" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Correo electrónico:</label>
+                                    <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="departamento">Departamento:</label>
+                                    <input type="text" id="departamento" name="departamento" placeholder="Ingresa el departamento" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contratacion">Fecha de contratación:</label>
+                                    <input type="date" id="contratacion" name="contratacion" placeholder="Ingresa la fecha de contratacion" required>
+                                </div>
+                                <div class="button-container2">
+                                    <label for="contratacion">Horario:</label>
+                                    <!-- Botón para abrir el modal -->
+                                    <button class="btn-horario" id="openModalBtn2">
+                                        Añadir horario
+                                    </button>  
+                                </div>
+                                <!-- El modal -->
+                                <div id="myModal2" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close">&times;</span>
+                                        <h2>Horario</h2>
+                                        <form id="empleadoFormHorario">
+                                            <div id="horarioContainer">
+                                                <div class="horario">
+                                                    <div class="form-group">
+                                                        <label for="entrada">Horario de entrada:</label>
+                                                        <input type="time" id="entrada" name="entrada" placeholder="Ingresa el horario de entrada" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="salida">Horario de salida:</label>
+                                                        <input type="time" id="salida" name="salida" placeholder="Ingresa el horario de salida" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <p>Días de trabajo:</p>
+                                                        <input class="input-horario" type="checkbox" id="lunes" name="lunes" required aria-label="Lunes" title="Lunes"> Lunes
+                                                        <input class="input-horario" type="checkbox" id="martes" name="martes" required aria-label="Martes" title="Martes"> Martes
+                                                        <input class="input-horario" type="checkbox" id="miercoles" name="miercoles" required aria-label="Miércoles" title="Miércoles"> Miércoles
+                                                        <input class="input-horario" type="checkbox" id="jueves" name="jueves" required aria-label="Jueves" title="Jueves"> Jueves
+                                                        <input class="input-horario" type="checkbox" id="viernes" name="viernes" required aria-label="Viernes" title="Viernes"> Viernes
+                                                        <input class="input-horario" type="checkbox" id="sabado" name="sabado" required aria-label="Sábado" title="Sábado"> Sábado
+                                                    </div>
+                                                    
+                                                   
+                                                </div>
+
+                                            </div> 
+
+                                            <div>
+                                                <div class="button-group">
+                                                    <button type="button" class="btn-add" id="addHorario">Agregar Horario</button>
+                                                    <button type="button" class="btn-reset" id="resetHorario">Restablecer</button>
+                                                    <button type="button" class="btn-cancel" id="cancelHorario">Cancelar</button>
+                                                    <button type="submit" class="btn-submit">Guardar</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>  
+                                <br>
+                                <div class="form-group">
+                                    <label for="usuario">Usuario:</label>
+                                    <input type="text" id="usuario" name="usuario" placeholder="Ingresa al usuario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contrasena">Contraseña:</label>
+                                    <input type="text" id="contrasena" name="contrasena" placeholder="Ingresa la contraseña" required>
+                                </div>
+                                <br>      
+                                <div class="button-container3">
+                                    <button type="submit" class="btn-cerrar">Cerrar</button>
+                                    <button type="submit" class="btn-guardar">Guardar</button>
+                                </div>
+                            </form>
                     </div>
                 </div>
             
@@ -429,6 +226,127 @@
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // ********* MODAL SECUNDARIO (Horario) *********
+            const openModalBtn2 = document.getElementById('openModalBtn2');
+            const modal2 = document.getElementById('myModal2');
+            const closeBtn2 = modal2.querySelector('.close'); // Botón "X"
+            const cancelBtn = document.getElementById("cancelHorario");
+        
+            // Función para cerrar el modal
+            function cerrarModal() {
+                modal2.style.display = "none"; // Cierra el modal
+            }
+        
+            // Abrir el modal secundario sin cerrar el modal principal
+            openModalBtn2.addEventListener('click', (event) => {
+                event.preventDefault();
+                modal2.style.display = 'block';
+            });
+        
+            // Cerrar el modal con la "X"
+            closeBtn2.addEventListener("click", cerrarModal);
+        
+            // Cerrar el modal con el botón "Cancelar" (si existe)
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", cerrarModal);
+            }
+        
+            // Cerrar el modal si se hace clic fuera de su contenido
+            window.addEventListener("click", function (event) {
+                if (event.target === modal2) {
+                    cerrarModal();
+                }
+            });
+        
+            // ********* INICIALIZACIÓN DEL HORARIO *********
+            const horarioContainer = document.getElementById("horarioContainer");
+            let entradaOriginal, salidaOriginal, diasOriginales = {};
+        
+            function inicializarHorarios() {
+                horarioContainer.innerHTML = `
+                    <div class="horario">
+                        <div class="form-group">
+                            <label>Horario de entrada:</label>
+                            <input type="time" name="entrada" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Horario de salida:</label>
+                            <input type="time" name="salida" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Días de trabajo:</label>
+                            <div class="dias-container">
+                                <input type="checkbox" name="lunes"><label>Lunes</label>
+                                <input type="checkbox" name="martes"><label>Martes</label>
+                                <input type="checkbox" name="miercoles"><label>Miércoles</label>
+                                <input type="checkbox" name="jueves"><label>Jueves</label>
+                                <input type="checkbox" name="viernes"><label>Viernes</label>
+                                <input type="checkbox" name="sabado"><label>Sábado</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        
+            // Inicializamos el contenedor de horarios
+            inicializarHorarios();
+        
+            // Agregar un nuevo horario
+            document.getElementById("addHorario").addEventListener("click", function () {
+                let nuevoHorario = document.createElement("div");
+                nuevoHorario.classList.add("horario");
+        
+                nuevoHorario.innerHTML = `
+                    <div class="form-group">
+                        <label>Horario de entrada:</label>
+                        <input type="time" name="entrada" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario de salida:</label>
+                        <input type="time" name="salida" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Días de trabajo:</label>
+                        <div class="dias-container">
+                            <input type="checkbox" name="lunes"><label>Lunes</label>
+                            <input type="checkbox" name="martes"><label>Martes</label>
+                            <input type="checkbox" name="miercoles"><label>Miércoles</label>
+                            <input type="checkbox" name="jueves"><label>Jueves</label>
+                            <input type="checkbox" name="viernes"><label>Viernes</label>
+                            <input type="checkbox" name="sabado"><label>Sábado</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-delete">Eliminar</button>
+                `;
+        
+                // Agregar evento para eliminar
+                nuevoHorario.querySelector(".btn-delete").addEventListener("click", function () {
+                    nuevoHorario.remove();
+                });
+        
+                horarioContainer.appendChild(nuevoHorario);
+            });
+        
+            // Restablecer horario a los valores originales
+            document.getElementById("resetHorario").addEventListener("click", function () {
+                let horarios = document.querySelectorAll(".horario");
+                horarios.forEach((horario, index) => {
+                    if (index === 0) { // Solo el primer horario vuelve a los valores originales
+                        horario.querySelector("[name='entrada']").value = entradaOriginal || "";
+                        horario.querySelector("[name='salida']").value = salidaOriginal || "";
+        
+                        let checkboxes = horario.querySelectorAll("input[type=checkbox]");
+                        checkboxes.forEach(checkbox => {
+                            checkbox.checked = diasOriginales[checkbox.name] || false;
+                        });
+                    } else {
+                        horario.remove(); // Los demás horarios agregados se eliminan
+                    }
+                });
+            });
         });
     </script>
 

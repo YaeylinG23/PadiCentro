@@ -389,10 +389,43 @@
         width: 100px;
     }
 
+    .btn-restablecer {
+        background-color: #e4c112;
+        color: white;
+        border-radius: 5px;
+        width: 100px;
+    }
+    
+    .btn-agregar {
+        background-color: #014CB9;
+        color: white;
+        border-radius: 5px;
+        width: 100px;
+    }
+
+    .btn-delete {
+        background-color: #831616;
+        color: white;
+        border-radius: 5px;
+        width: 100px;
+    }
+
     .btn-cerrar:hover {
         background-color: darkred;
     }
     
     .btn-guardar:hover {
         background-color: darkgreen;
+    }
+
+    .btn-restablecer:hover {
+        background-color: darkgoldenrod;
+    }
+    
+    .btn-agregar:hover {
+        background-color: darkblue;
+    }
+
+    .btn-delete:hover {
+        background-color: darkred;
     }

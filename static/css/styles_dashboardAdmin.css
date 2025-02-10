@@ -110,13 +110,13 @@ body, html {
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    margin-top: 9rem;
+    margin-top: 6rem;
     z-index: 2;
 }
 
 .button-container a {
     width: 100%;
-    max-width: 35rem;
+    max-width: 40rem;
     margin: 0 auto;
     text-align: center;
     padding: 1.3rem;
@@ -134,6 +134,11 @@ body, html {
 .btn-custom-1 {
     background-color: #F9D007;
     border: 1px solid #F9D007;
+}
+
+.btn-custom-2 {
+    background-color: #014CB9; /* Azul */
+    border: 1px solid #014CB9;
 }
 
 .btn-custom-3 {

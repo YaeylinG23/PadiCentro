@@ -44,9 +44,15 @@
                 </a>
                 <!-- Menú desplegable -->
                 <div id="dropdownContent" class="dropdown-content">
-                    <a href="#">Opción 1</a>
-                    <a href="#">Opción 2</a>
-                    <a href="#">Opción 3</a>
+                    <label class="dropdown-item">
+                        <input type="checkbox" value="opcion1"> Opción 1
+                    </label>
+                    <label class="dropdown-item">
+                        <input type="checkbox" value="opcion1"> Opción 2
+                    </label>
+                    <label class="dropdown-item">
+                        <input type="checkbox" value="opcion1"> Opción 3
+                    </label>
                 </div>
             
                 <!-- Botón para abrir el modal -->
@@ -112,14 +118,32 @@
                                                         <label for="salida">Horario de salida:</label>
                                                         <input type="time" id="salida" name="salida" placeholder="Ingresa el horario de salida" required>
                                                     </div>
-                                                    <div class="">
-                                                        <p>Días de trabajo:</p>
-                                                        <input type="checkbox" id="lunes" name="lunes" required aria-label="Lunes" title="Lunes"> Lunes
-                                                        <input type="checkbox" id="martes" name="martes" required aria-label="Martes" title="Martes"> Martes
-                                                        <input type="checkbox" id="miercoles" name="miercoles" required aria-label="Miércoles" title="Miércoles"> Miércoles
-                                                        <input type="checkbox" id="jueves" name="jueves" required aria-label="Jueves" title="Jueves"> Jueves
-                                                        <input type="checkbox" id="viernes" name="viernes" required aria-label="Viernes" title="Viernes"> Viernes
-                                                        <input type="checkbox" id="sabado" name="sabado" required aria-label="Sábado" title="Sábado"> Sábado
+                                                    <div class="horario">
+                                                        <label>Días de trabajo</label>
+                                                        <div>
+                                                            <input type="checkbox" id="lunes" name="lunes">
+                                                            <label for="lunes">Lunes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input type="checkbox" id="martes" name="martes">
+                                                            <label for="martes">Martes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input type="checkbox" id="miercoles" name="miercoles">
+                                                            <label for="miercoles">Miércoles</label>
+                                                        </div>
+                                                        <div>
+                                                            <input type="checkbox" id="jueves" name="jueves">
+                                                            <label for="jueves">Jueves</label>
+                                                        </div>
+                                                        <div>
+                                                            <input type="checkbox" id="viernes" name="viernes">
+                                                            <label for="viernes">Viernes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input type="checkbox" id="sabado" name="sabado">
+                                                            <label for="sabado">Sábado</label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div> 
@@ -128,8 +152,8 @@
                                                 <div class="button-group">
                                                     <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
                                                     <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
-                                                    <button type="button" class="btn-cerrar" id="cancelHorario">Cancelar</button>
-                                                    <button type="submit" class="btn-guardar">Guardar</button>
+                                                    <button type="button" class="btn-cerrar2" id="cancelHorario">Cancelar</button>
+                                                    <button type="submit" class="btn-guardar2">Guardar</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -145,7 +169,8 @@
                                     <input type="text" id="contrasena" name="contrasena" placeholder="Ingresa la contraseña" required>
                                 </div>
                                 <br>      
-                                <div class="button-container3">
+                                <div class="button">
+                                    <button type="submit" class="btn-crear">Generar credenciales</button>
                                     <button type="submit" class="btn-cerrar">Cerrar</button>
                                     <button type="submit" class="btn-guardar">Guardar</button>
                                 </div>
@@ -324,6 +349,7 @@
         
                 nuevoHorario.innerHTML = `
                     <div class="form-group">
+                        <h5>Nuevo horario</h5>
                         <label>Horario de entrada:</label>
                         <input type="time" name="entrada" required>
                     </div>

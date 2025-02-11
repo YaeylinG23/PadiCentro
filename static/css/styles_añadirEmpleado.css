@@ -230,7 +230,6 @@
         }
     }
 
-
     /* Contenedor del menú desplegable */
     .dropdown {
         position: relative;
@@ -267,23 +266,77 @@
         display: block;
     }
 
+    /*Modal*/
+    .modal {
+        height: 80%;
+        width: 55%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        border-radius: 30px;
+    }
+
+    .modal2 {
+        height: 75%;
+        width: 68%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        border-radius: 30px;
+    }
+
+    .modal-content {
+        padding: 50px;
+        border: 6px solid #F9D007;
+        border-radius: 30px;
+    }
+
+    .modal h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
     /*Formulario*/
     .form-group {
         margin-bottom: 15px;
     }
-    label {
 
+    /*Input para primer formulario*/
+    input[type="text"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="time"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    width: 100%;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="tel"]:focus,
+    input[type="email"]:focus,
+    input[type="time"]:focus {
+        border-color: #007bff;
+    }
+    /*Input para checkbox*/
+    input[type="checkbox"] {
+        /* Aquí puedes poner los estilos que desees para los checkboxes */
+        transform: scale(1.3); /* Aumentar el tamaño del checkbox */
+        margin-right: 5px;
+    }
+
+    label {
         font-weight: bold;
         margin-bottom: 5px;
-    }
-    input, select {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        outline: none;
-    }
-    input:focus, select:focus {
-        border-color: #007bff;
     }
 
     button {
@@ -297,12 +350,6 @@
     }
     button:hover {
         background-color: #0056b3;
-    }
-
-    .checkbox-container{
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
     }
 
     /*Botón del horario*/
@@ -321,40 +368,6 @@
     
     .btn-horario:active {
         background-color: #3e8e41;
-    }
-
-    /*Modal*/
-    .modal {
-        height: 80%;
-        width: 60%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 30px;
-        position: fixed;
-        border: 4px solid #F9D007;
-    }
-
-    .modal2 {
-        height: 80%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 30px;
-        position: fixed;
-    }
-
-    .modal-content {
-        padding: 50px;
-    }
-
-    .modal h2 {
-        text-align: center;
-        margin-bottom: 25px;
-        font-size: 20px;
-        font-weight: bold;
     }
 
   /* Botón para cerrar el modal */
@@ -384,14 +397,51 @@
         justify-content: flex-end; /* Alineación al inicio */
     }
 
-    .btn-cerrar {
+    /*Botones de cerrar, guardar, restablecer y agregar*/
+
+    .button {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    
+    .btn-crear {
+        flex: 1;
+        background-color: #014CB9;
+        color: white;
+        border-radius: 5px;
+        padding: 10px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    .btn-cerrar,
+    .btn-guardar {
+        flex: 0 0 100px;
+        background-color: #FF000B;
+        color: white;
+        border-radius: 5px;
+        padding: 10px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .btn-guardar {
+        background-color: #4DAD33;
+    }
+
+    .btn-cerrar2 {
         background-color: #FF000B;
         color: white;
         border-radius: 5px;
         width: 100px;
     }
     
-    .btn-guardar {
+    .btn-guardar2 {
         background-color: #4DAD33;
         color: white;
         border-radius: 5px;
@@ -419,6 +469,10 @@
         width: 100px;
     }
 
+    .btn-crear:hover {
+        background-color: darkblue;
+    }
+
     .btn-cerrar:hover {
         background-color: darkred;
     }
@@ -439,12 +493,28 @@
         background-color: darkred;
     }
 
+    /*Estilos de alineación para botones*/
+    .button-group {
+        display: flex; /* Activa Flexbox */
+        gap: 10px; /* Espacio entre los botones */
+    }
+    
+    .button-group button {
+        flex: 1; /* Hace que cada botón ocupe el mismo espacio */
+        padding: 10px; /* Añade un padding para mejor apariencia */
+        border: none; /* Elimina el borde por defecto */
+        border-radius: 5px; /* Bordes redondeados */
+        font-size: 16px; /* Tamaño de fuente */
+        cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    }
+
     h5{
         font-size: 18px;
         text-align: center;
         font-weight: bold;
     }
 
+    /*Botón descargar*/
     .btn-descargar {
         background-color: #ffffff;
         border: 4px solid #4DAD33;

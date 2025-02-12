@@ -1,0 +1,321 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body, html {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+.dashboard-container {
+    width: 100%;
+    height: 100%;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.header-blue {
+    background: #014CB9;
+    color: #F9D007;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.top-bar {
+    background: #4DAD33;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    color: white;
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+
+}
+
+.logo-container {
+    position: absolute;
+    top: -5rem;
+    left: 8%;
+    transform: translateX(-50%);
+    padding: 1rem;
+    z-index: 3;
+}
+
+.logo-container img {
+    height: 10rem;
+    width: 10rem;
+}
+
+.welcome-text {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+    font-size: 20px;
+    margin-left: 220px; /* Ajusta si es necesario */
+}
+
+.welcome-text2 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.logout-button {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    z-index: 2;
+}
+
+.content {
+    padding: 1.5rem;
+    display: flex;
+    z-index: 2;
+    gap: 10px;
+}
+
+/* Ajustar la separación de la tabla */
+.content2 {
+    padding: 0.5rem;
+    z-index: 1;
+    margin-top: -10px;
+}
+
+/*Decoraciones*/
+.decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+.decorations img {
+    position: fixed;
+    width: 10rem;
+    z-index: 1;
+}
+.top-left { left: 5px; top: 12rem; }
+.top-right { right: 0px; top: 12rem; }
+.bottom-left { left: 0; bottom: 0; }
+.bottom-right { right: 0px; bottom: 0px; }
+.top-right { transform: scaleY(-1); }
+.bottom-left { transform: rotate(180deg) scaleY(-1); }
+
+/*Texto*/
+h4{
+    font-size: 25px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Menú desplegable */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropbtn {
+    background-color: #ffffff;
+    color: black;
+    padding: 10px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50px;
+    border: 4px solid #F9D007;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.dropbtn:hover {
+    background-color: #F9D007;
+    color: white;
+    transform: translateY(-2px);
+}
+.dropbtn i {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 245px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 30px;
+    padding: 10px;
+    border: 4px solid #F9D007;
+}
+.dropdown-content label {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.dropdown-content label input {
+    margin-right: 10px;
+}
+.dropdown-content label:hover {
+    background-color: #f1f1f1;
+}
+.show {
+    display: block;
+}
+
+/*Botón de permisos*/
+.dropbtn3 {
+    background-color: #ffffff;
+    color: black;
+    padding: 10px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50px;
+    border: 4px solid #014CB9;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.dropbtn3:hover {
+    background-color: #014CB9;
+    color: white;
+    transform: translateY(-2px);
+}
+.dropbtn3 i {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+}
+
+/*Botón de vacaciones*/
+.dropbtn4 {
+    background-color: #ffffff;
+    color: black;
+    padding: 10px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50px;
+    border: 4px solid #4DAD33;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.dropbtn4:hover {
+    background-color: #4DAD33;
+    color: white;
+    transform: translateY(-2px);
+}
+.dropbtn4 i {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+}
+
+/* Contenedor de la tabla */
+.table-wrapper {
+    background: white;
+    border: 4px solid #014CB9;
+    border-radius: 50px;
+    padding: 1.5rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+.table-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 4px solid#F9D007;
+    
+}
+.table-custom thead {
+    background-color: #D9D9D9;
+    color: black;
+    font-size: 14px;
+    
+}
+.table-custom th,
+.table-custom td {
+    padding: .6rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+.table-custom tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.table-custom tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table-custom thead tr:first-child th:first-child {
+    border-top-left-radius: 20px;
+}
+.table-custom thead tr:first-child th:last-child {
+    border-top-right-radius: 20px;
+}
+.table-custom tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 20px;
+}
+.table-custom tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 20px;
+}
+h5{
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/*Botón descargar*/
+.btn-descargar {
+    background-color: #ffffff;
+    border: 4px solid #4DAD33;
+    border-radius: 50px;
+    color: black;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px 20px;
+    width: auto;
+    max-width: 200px;
+    display: inline-block;
+    margin-left: auto;
+}
+
+.btn-descargar:hover {
+    background-color: #4DAD33;
+    color: #ffffff;
+}
+
+/* Estilos para la tabla interna con scroll horizontal */
+.scrollable-table {
+    max-width: 200px; /* Ancho máximo antes de que aparezca el scroll */
+    overflow-x: auto; /* Habilitar scroll horizontal */
+    white-space: nowrap; /* Evitar que el contenido se divida en varias líneas */
+    display: block;
+}
+
+.scrollable-table table {
+    width: auto; /* Ancho automático para que la tabla se expanda según su contenido */
+    border-collapse: collapse;
+}
+
+.scrollable-table th, .scrollable-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}

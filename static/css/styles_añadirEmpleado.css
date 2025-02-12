@@ -63,7 +63,7 @@
         text-align: left;
         font-weight: bold;
         font-size: 20px;
-        margin-left: 190px; /* Ajusta si es necesario */
+        margin-left: 220px; /* Ajusta si es necesario */
     }
     .welcome-text2 {
         text-align: center;
@@ -79,13 +79,21 @@
         z-index: 2;
     }
 
+    /* Ajustar el espaciado general del contenedor */
     .content {
-        padding: 2rem;
-        min-height: 400px;
-        position: relative;
-        z-index: 1;
+        padding: 1.5rem; /* Reducido de 2rem a 1rem */
+        display: flex;
+        z-index: 2;
+        gap: 10px; /* Reducido el espacio entre botones */
     }
 
+    /* Ajustar la separación de la tabla */
+    .content2 {
+        padding: 0.5rem; /* Reducido aún más */
+        z-index: 1;
+        margin-top: -10px; /* Reducir espacio con la tabla */
+    }
+    
     .decorations {
         position: absolute;
         width: 100%;
@@ -145,17 +153,6 @@
     .btn-custom-1:hover {
         background-color: #4DAD33; /* Fondo verde al hacer hover */
         color: white; /* Texto blanco al hacer hover */
-        transform: translateY(-2px);
-    }
-
-    .btn-custom-3 {
-        background-color: rgb(255, 255, 255);
-        border-color: #F9D007 !important; /* Borde amarillo */
-    }
-
-    .btn-custom-3:hover {
-        background-color: #F9D007; /* Fondo amarillo al hacer hover */
-        color: white; /* Texto negro al hacer hover */
         transform: translateY(-2px);
     }
 
@@ -236,32 +233,66 @@
         display: inline-block;
     }
 
+    /* Botón del menú */
+    .dropbtn {
+        background-color: #ffffff;
+        color: black;
+        padding: 10px 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 50px;
+        border: 4px solid #F9D007;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    /* Cambio de color al pasar el mouse */
+    .dropbtn:hover {
+        background-color: #F9D007; /* Amarillo */
+        color: white; /* Texto en blanco */
+        transform: translateY(-2px);
+    }
+
+    .dropbtn i {
+        margin-left: 0.5rem; /* Icono a la derecha */
+        font-size: 1.2rem;
+    }
+
     /* Contenido del menú desplegable */
     .dropdown-content {
-        display: none; /* Oculto por defecto */
+        display: none;
         position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
+        background-color: white;
+        min-width: 245px;
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1;
+        z-index: 1000;
+        border-radius: 30px;
+        padding: 10px;
+        border: 4px solid #F9D007;
+    }
+
+    /* Estilo para cada opción */
+    .dropdown-content label {
+        display: flex;
+        align-items: center;
+        padding: 8px;
         border-radius: 5px;
-        overflow: hidden;
+        cursor: pointer;
+        transition: background 0.3s;
     }
 
-    /* Estilo de los enlaces dentro del menú */
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
+    /* Separación de los checkboxes */
+    .dropdown-content label input {
+        margin-right: 10px;
     }
 
-    /* Cambiar color al pasar el ratón sobre los enlaces */
-    .dropdown-content a:hover {
+    /* Hover sobre opciones */
+    .dropdown-content label:hover {
         background-color: #f1f1f1;
     }
 
-    /* Mostrar el menú desplegable */
+    /* Mostrar el menú */
     .show {
         display: block;
     }
@@ -274,19 +305,20 @@
         left: 50%;
         transform: translate(-50%, -50%);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        position: fixed;
         border-radius: 30px;
+        z-index: 1000;
     }
 
     .modal2 {
-        height: 75%;
-        width: 68%;
+        height: 50%;
+        width: 57%;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         position: fixed;
         border-radius: 30px;
+        z-index: 1000;
     }
 
     .modal-content {
@@ -325,7 +357,7 @@
     input[type="tel"]:focus,
     input[type="email"]:focus,
     input[type="time"]:focus {
-        border-color: #007bff;
+        border-color: #F9D007;
     }
     /*Input para checkbox*/
     input[type="checkbox"] {
@@ -401,12 +433,11 @@
 
     .button {
         display: flex;
-        justify-content: space-between;
         gap: 10px;
     }
     
     .btn-crear {
-        flex: 1;
+        width: 200px; /* Ancho reducido */
         background-color: #014CB9;
         color: white;
         border-radius: 5px;
@@ -414,13 +445,14 @@
         border: none;
         font-size: 16px;
         cursor: pointer;
-        text-align: left;
+        text-align: center; /* Centrar el texto */
         white-space: nowrap;
+        margin-right: auto; /* Mueve el botón "Crear" a la izquierda */
     }
     
     .btn-cerrar,
     .btn-guardar {
-        flex: 0 0 100px;
+        width: 150px; /* Ancho fijo */
         background-color: #FF000B;
         color: white;
         border-radius: 5px;
@@ -428,6 +460,8 @@
         border: none;
         font-size: 16px;
         cursor: pointer;
+        text-align: center; /* Centrar el texto */
+        margin-left: 10px; /* Espacio entre los botones */
     }
     
     .btn-guardar {
@@ -533,4 +567,32 @@
     .btn-descargar:hover {
         background-color: #4DAD33;
         color: #ffffff;
+    }
+
+    /*Estilos para los iconos de eliminar y editar*/
+    td i {
+        cursor: pointer; /* Cambia el cursor a una mano al pasar sobre los íconos */
+        font-size: 20px; /* Tamaño de los íconos */
+        margin: 0 5px; /* Espacio entre los íconos */
+        transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+    }
+
+    /* Estilo específico para el ícono de editar */
+    .fa-edit {
+        color: #014CB9; /* Color azul */
+    }
+
+    /* Estilo específico para el ícono de eliminar */
+    .fa-trash {
+        color: #FF000B; /* Color rojo */
+    }
+
+    /* Efecto al pasar el mouse sobre los íconos */
+    td i:hover {
+        transform: scale(1.2); /* Aumenta ligeramente el tamaño */
+    }
+
+    /* Efecto al hacer clic en los íconos */
+    td i:active {
+        transform: scale(0.9); /* Reduce ligeramente el tamaño */
     }

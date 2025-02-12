@@ -1,15 +1,14 @@
 #Librerias y framework
-from flask import Flask, request, render_template, redirect, url_for, session, make_response
+from flask import Flask, request, render_template, redirect, url_for, session, make_response, jsonify, send_file
 # request: Maneja solicitudes HTTP (obtener datos de formularios, parámetros, etc.).
 # render_template: Renderiza plantillas HTML dinámicas con contenido.
 # redirect: Redirige al usuario a otra URL.
 # url_for: Genera dinámicamente las URLs según las rutas definidas.
 # session: Gestiona datos de sesión del usuario (cookies cifradas).
-import pandas as pd  
-# Librería para manipular y analizar datos (no se usa en este código, pero se puede utilizar en el futuro).
-import psycopg2  
-# Conecta e interactúa con bases de datos PostgreSQL.
-
+import pandas as pd # Librería para manipular y analizar datos (no se usa en este código, pero se puede utilizar en el futuro).
+import psycopg2 # Conecta e interactúa con bases de datos PostgreSQL.
+import random
+import string
 
 app = Flask(__name__) # Crea una instancia de la aplicación Flask.
 app.secret_key = 'Contreseña' # Clave secreta necesaria para manejar las sesiones de forma segura. Se recomienda cambiarla en producción y no exponerla.
@@ -92,7 +91,24 @@ def añadir_empleados():
         return response
     else:
         return redirect(url_for('login'))
+
+#Sistema de asistencias para Admin
+@app.route('/asistencias')
+def asistencias():
+    return render_template('Admin/asistencias.html')  # Ruta relativa a la carpeta Admin
+
     
+#Botón para generar credenciales
+def generar_contrasena(longitud=12): # Función para generar contraseña aleatoria
+    caracteres = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(caracteres) for _ in range(longitud))
+
+@app.route('/generar_contrasena') # Ruta para generar la contraseña
+def generar():
+    contrasena = generar_contrasena()
+    return jsonify({'contrasena': contrasena})
+
+
 #Cerrar sesión
 @app.route('/logout') # Define la ruta '/logout'.
 def logout():  

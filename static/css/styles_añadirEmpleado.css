@@ -85,6 +85,7 @@
         display: flex;
         z-index: 2;
         gap: 10px; /* Reducido el espacio entre botones */
+        flex-wrap: wrap;
     }
 
     /* Ajustar la separación de la tabla */
@@ -311,7 +312,7 @@
 
     .modal2 {
         height: 50%;
-        width: 57%;
+        width: 65%;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -469,7 +470,7 @@
     }
 
     .btn-cerrar2 {
-        background-color: #FF000B;
+        background-color: #4DAD33;
         color: white;
         border-radius: 5px;
         width: 100px;
@@ -596,3 +597,27 @@
     td i:active {
         transform: scale(0.9); /* Reduce ligeramente el tamaño */
     }
+
+    /* Contenedor de checkboxes */
+.checkbox-container {
+    display: flex;
+    gap: 15px; /* Espacio entre elementos */
+    flex-wrap: wrap; /* Permite que se ajusten en pantallas pequeñas */
+}
+
+.checkbox-container > div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Separador entre horarios */
+.separador-horario {
+    margin: 4px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+.horario-item {
+    padding: 4px 0;
+}

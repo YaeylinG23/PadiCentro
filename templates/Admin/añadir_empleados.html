@@ -6,6 +6,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_añadirEmpleado.css') }}">
     <title>Añadir usuarios</title>
 </head>
@@ -59,85 +60,89 @@
                 <div id="myModal" class="modal">
                     <div class="modal-content">
                         <span class="close">&times;</span>
-                        <h2>Registrar usuario</h2>
-                        <!-- Formulario dentro del modal -->
-                        <form id="empleadoForm" action="{{ url_for('añadir_empleados') }}" method="POST">
-                            <div class="form-group">
-                                <label for="nombre">Nombre Completo:</label>
-                                <input type="text" id="nombre" name="nombre" placeholder="Ingresa el nombre" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="nacimiento">Fecha de nacimiento:</label>
-                                <input type="date" id="nacimiento" name="nacimiento" placeholder="Ingresa la fecha de nacimiento" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="direccion">Dirección:</label>
-                                <input type="text" id="direccion" name="direccion" placeholder="Ingresa la dirección" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="telefono">Teléfono:</label>
-                                <input type="tel" id="telefono" maxlength="10" name="telefono" placeholder="Ingresa el teléfono" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Correo electrónico:</label>
-                                <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="departamento">Departamento:</label>
-                                <input type="text" id="departamento" name="departamento" placeholder="Ingresa el departamento" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="contratacion">Fecha de contratación:</label>
-                                <input type="date" id="contratacion" name="contratacion" placeholder="Ingresa la fecha de contratacion" required>
-                            </div>
-                            <div class="button-container2">
-                                <label for="contratacion">Horario:</label>
-                                <!-- Botón para abrir el modal -->
-                                <button class="btn-horario" id="openModalBtn2">
-                                    Añadir horario
-                                </button>  
-                            </div>
-                            <!-- El modal -->
+                        <h2>Registrar empleado</h2>
+                         <!-- Formulario dentro del modal -->
+                            <form id="empleadoForm" action="/añadir_empleados" method="POST">
+                                <input type="hidden" name="id_uem" id="id_uem"> <!-- Campo oculto --> 
+                                <div class="form-group">
+                                    <label for="nombre">Nombre Completo:</label>
+                                    <input type="text" id="nombre" name="nombre_completo" placeholder="Ingresa el nombre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nacimiento">Fecha de nacimiento:</label>
+                                    <input type="date" id="nacimiento" name="fecha_nacimiento" placeholder="Ingresa la fecha de nacimiento" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="direccion">Dirección:</label>
+                                    <input type="text" id="direccion" name="direccion" placeholder="Ingresa la dirección" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="tel" id="telefono" maxlength="10" name="telefono" placeholder="Ingresa el teléfono" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Correo electrónico:</label>
+                                    <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="departamento">Departamento:</label>
+                                    <input type="text" id="departamento" name="departamento" placeholder="Ingresa el departamento" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contratacion">Fecha de contratación:</label>
+                                    <input type="date" id="contratacion" name="fecha_contratacion" placeholder="Ingresa la fecha de contratacion" required>
+                                </div>
+                                <div class="button-container2">
+                                    <label for="contratacion">Horario:</label>
+                                    <!-- Botón para abrir el modal -->
+                                    <button type="button" class="btn-horario" id="openModalBtn2">
+                                        Añadir horario
+                                    </button>  
+                                    <!-- Campo oculto para almacenar los horarios (en JSON) -->
+                                    <input type="hidden" id="horarios_data" name="horarios_data">
+                            <!-- El modal 2 -->
                             <div id="myModal2" class="modal2">
                                 <div class="modal-content">
                                     <span class="close">&times;</span>
                                     <h2>Horario</h2>
-                                    <form id="empleadoFormHorario">
+                                    <div id="empleadoFormHorario">
                                         <div id="horarioContainer">
                                             <div class="horario">
                                                 <div class="form-group">
                                                     <label for="entrada">Horario de entrada:</label>
-                                                    <input type="time" id="entrada" name="entrada" placeholder="Ingresa el horario de entrada" required>
+                                                    <input type="time" class="input-entrada" name="horario_entrada_campo[]" placeholder="Ingresa el horario de entrada" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="salida">Horario de salida:</label>
-                                                    <input type="time" id="salida" name="salida" placeholder="Ingresa el horario de salida" required>
+                                                    <input type="time" class="input-salida" name="horario_salida_campo[]" placeholder="Ingresa el horario de salida" required>
                                                 </div>
-                                                <div class="horario">
+                                                <div class="form-group">
                                                     <label>Días de trabajo</label>
-                                                    <div>
-                                                        <input type="checkbox" id="lunes" name="lunes">
-                                                        <label for="lunes">Lunes</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="checkbox" id="martes" name="martes">
-                                                        <label for="martes">Martes</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="checkbox" id="miercoles" name="miercoles">
-                                                        <label for="miercoles">Miércoles</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="checkbox" id="jueves" name="jueves">
-                                                        <label for="jueves">Jueves</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="checkbox" id="viernes" name="viernes">
-                                                        <label for="viernes">Viernes</label>
-                                                    </div>
-                                                    <div>
-                                                        <input type="checkbox" id="sabado" name="sabado">
-                                                        <label for="sabado">Sábado</label>
+                                                    <div class="checkbox-container">
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="lunes" name="dias[]"  aria-label="Lunes" value="Lunes">
+                                                            <label for="lunes">Lunes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="martes" name="dias[]"  aria-label="Martes" value="Martes"> 
+                                                            <label for="martes">Martes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="miercoles" name="dias[]"  aria-label="Miércoles" value="Miércoles"> 
+                                                            <label for="miercoles">Miércoles</label>
+                                                        </div>
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="jueves" name="dias[]"  aria-label="Jueves" value="Jueves"> 
+                                                            <label for="jueves">Jueves</label>
+                                                        </div>
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="viernes" name="dias[]"  aria-label="Viernes" value="Viernes"> 
+                                                            <label for="viernes">Viernes</label>
+                                                        </div>
+                                                        <div>
+                                                            <input class="input-horario" type="checkbox" id="sabado" name="dias[]"  aria-label="Sábado" value="Sábado">
+                                                            <label for="sabado">Sábado</label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -147,11 +152,10 @@
                                             <div class="button-group">
                                                 <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
                                                 <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
-                                                <button type="button" class="btn-cerrar2" id="cancelHorario">Cancelar</button>
-                                                <button type="submit" class="btn-guardar2">Guardar</button>
+                                                <button type="button" class="btn-cerrar2" id="cancelHorario">Guardar</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>  
                             <br>
@@ -166,7 +170,7 @@
                             <br>      
                             <div class="button">
                                 <button type="button" class="btn-crear" onclick="generarContrasena()">Generar credenciales</button>
-                                <button type="submit" class="btn-cerrar">Cerrar</button>
+                                <button type="button" class="btn-cerrar" onclick="document.getElementById('myModal').style.display='none'">Cerrar</button>
                                 <button type="submit" class="btn-guardar">Guardar</button>
                             </div>
                         </form>
@@ -197,144 +201,66 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
+                            <!-- Modifica el tbody de la tabla -->
                     <tbody>
+                        {% for colaborador in colaboradores %}
                         <tr>
-                            <td>Alexis Ortiz Corona</td>
-                            <td>Alexis</td>
-                            <td>A13x_1z</td>
-                            <td>Alexis@email.com</td>
-                            <td>Dirección</td>
-                            <td>02/15/2022</td>
-                            <td>Cañada</td>
-                            <td>7721548637</td>
-                            <td>29/02/1994</td>
-                            <td>9:00 am</td>
-                            <td>6:00 pm</td>
-                            <td>Lunes-Viernes</td>
+                            <td>{{ colaborador[1] }}</td> <!-- nombre_completo -->
+                            <td>{{ colaborador[8] }}</td> <!-- usuario -->
+                            <td>{{ colaborador[9] }}</td> <!-- contrasena -->
+                            <td>{{ colaborador[5] }}</td> <!-- email -->
+                            <td>{{ colaborador[6] }}</td> <!-- departamento -->
+                            <td>{{ colaborador[7].strftime('%d/%m/%Y') if colaborador[7] }}</td> <!-- fecha_contratacion -->
+                            <td>{{ colaborador[3] }}</td> <!-- direccion -->
+                            <td>{{ colaborador[4] }}</td> <!-- telefono -->
+                            <td>{{ colaborador[2].strftime('%d/%m/%Y') if colaborador[2] }}</td> <!-- fecha_nacimiento -->
+                            <!-- Horario de entrada -->
                             <td>
-                                <i class="fas fa-edit" onclick="abrirModalEditar()"></i><br><br>
-                                <i class="fas fa-trash" onclick="eliminarRegistro()"></i>
+                                {% if colaborador[10] %}
+                                <div class="horario-item">
+                                {% for entrada in colaborador[10] %}
+                                    {{ entrada }}
+                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                                {% endfor %}
+                                </div>
+                                {% else %}
+                                N/A
+                                {% endif %}
                             </td>
                             
-                            <!-- El modal --> <!--Cambiar el id del modal porque agarra lo que hace el modal de arriba-->
-                            <div id="myModal" class="modal">
-                                <div class="modal-content">
-                                    <span class="close">&times;</span>
-                                    <h2>Registrar usuario</h2>
-                                    <!-- Formulario dentro del modal -->
-                                    <form id="empleadoForm" action="/" method="POST">
-                                        <div class="form-group">
-                                            <label for="nombre">Nombre Completo:</label>
-                                            <input type="text" id="nombre" name="nombre" placeholder="Ingresa el nombre" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="nacimiento">Fecha de nacimiento:</label>
-                                            <input type="date" id="nacimiento" name="nacimiento" placeholder="Ingresa la fecha de nacimiento" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="direccion">Dirección:</label>
-                                            <input type="text" id="direccion" name="direccion" placeholder="Ingresa la dirección" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="telefono">Teléfono:</label>
-                                            <input type="tel" id="telefono" maxlength="10" name="telefono" placeholder="Ingresa el teléfono" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="email">Correo electrónico:</label>
-                                            <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="departamento">Departamento:</label>
-                                            <input type="text" id="departamento" name="departamento" placeholder="Ingresa el departamento" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="contratacion">Fecha de contratación:</label>
-                                            <input type="date" id="contratacion" name="contratacion" placeholder="Ingresa la fecha de contratacion" required>
-                                        </div>
-                                        <div class="button-container2">
-                                            <label for="contratacion">Horario:</label>
-                                            <!-- Botón para abrir el modal -->
-                                            <button class="btn-horario" id="openModalBtn2">
-                                                Añadir horario
-                                            </button>  
-                                        </div>
-                                        <!-- El modal -->
-                                        <div id="myModal2" class="modal2">
-                                            <div class="modal-content">
-                                                <span class="close">&times;</span>
-                                                <h2>Horario</h2>
-                                                <form id="empleadoFormHorario">
-                                                    <div id="horarioContainer">
-                                                        <div class="horario">
-                                                            <div class="form-group">
-                                                                <label for="entrada">Horario de entrada:</label>
-                                                                <input type="time" id="entrada" name="entrada" placeholder="Ingresa el horario de entrada" required>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="salida">Horario de salida:</label>
-                                                                <input type="time" id="salida" name="salida" placeholder="Ingresa el horario de salida" required>
-                                                            </div>
-                                                            <div class="horario">
-                                                                <label>Días de trabajo</label>
-                                                                <div>
-                                                                    <input type="checkbox" id="lunes" name="lunes">
-                                                                    <label for="lunes">Lunes</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="checkbox" id="martes" name="martes">
-                                                                    <label for="martes">Martes</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="checkbox" id="miercoles" name="miercoles">
-                                                                    <label for="miercoles">Miércoles</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="checkbox" id="jueves" name="jueves">
-                                                                    <label for="jueves">Jueves</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="checkbox" id="viernes" name="viernes">
-                                                                    <label for="viernes">Viernes</label>
-                                                                </div>
-                                                                <div>
-                                                                    <input type="checkbox" id="sabado" name="sabado">
-                                                                    <label for="sabado">Sábado</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div> 
-                                                    <div>
-                                                        <br>
-                                                        <div class="button-group">
-                                                            <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
-                                                            <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
-                                                            <button type="button" class="btn-cerrar2" id="cancelHorario">Cancelar</button>
-                                                            <button type="submit" class="btn-guardar2">Guardar</button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>  
-                                        <br>
-                                        <div class="form-group">
-                                            <label for="usuario">Usuario:</label>
-                                            <input type="text" id="usuario" name="usuario" placeholder="Ingresa al usuario" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="contrasena">Contraseña:</label>
-                                            <input type="text" id="contrasena" name="contrasena" placeholder="Ingresa la contraseña" required>
-                                        </div>
-                                        <br>      
-                                        <div class="button">
-                                            <button type="button" class="btn-crear" onclick="generarContrasena()">Generar credenciales</button>
-                                            <button type="submit" class="btn-cerrar">Cerrar</button>
-                                            <button type="submit" class="btn-guardar">Guardar</button>
-                                        </div>
-                                    </form>
+                            <!-- Horario de salida -->
+                            <td>
+                                {% if colaborador[11] %}
+                                <div class="horario-item">
+                                {% for salida in colaborador[11] %}
+                                    {{ salida }}
+                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                                {% endfor %}
                                 </div>
-                            </div>
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Días de trabajo -->
+                            <td>
+                                {% if colaborador[12] %}
+                                <div class="horario-item">
+                                {% for dias in colaborador[12] %}
+                                    {{ dias|join(', ') }}
+                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                                {% endfor %}
+                                </div>
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                <i class="fas fa-edit btn-editar" data-id="{{ colaborador[0] }}"></i>
+                                <i class="fas fa-trash btn-eliminar" data-id="{{ colaborador[0] }}"></i>
+                            </td>                            
                         </tr>
-                        <!-- Más filas aquí -->
+                        {% endfor %}
                     </tbody>
                 </table>
                 <br>
@@ -424,94 +350,6 @@
                     cerrarModal();
                 }
             });
-        
-            // ********* INICIALIZACIÓN DEL HORARIO *********
-            const horarioContainer = document.getElementById("horarioContainer");
-            let entradaOriginal, salidaOriginal, diasOriginales = {};
-        
-            function inicializarHorarios() {
-                horarioContainer.innerHTML = `
-                    <div class="horario">
-                        <div class="form-group">
-                            <label>Horario de entrada:</label>
-                            <input type="time" name="entrada" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Horario de salida:</label>
-                            <input type="time" name="salida" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Días de trabajo:</label>
-                            <div class="dias-container">
-                                <input type="checkbox" name="lunes"><label>Lunes</label>
-                                <input type="checkbox" name="martes"><label>Martes</label>
-                                <input type="checkbox" name="miercoles"><label>Miércoles</label>
-                                <input type="checkbox" name="jueves"><label>Jueves</label>
-                                <input type="checkbox" name="viernes"><label>Viernes</label>
-                                <input type="checkbox" name="sabado"><label>Sábado</label>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        
-            // Inicializamos el contenedor de horarios
-            inicializarHorarios();
-        
-            // Agregar un nuevo horario
-            document.getElementById("addHorario").addEventListener("click", function () {
-                let nuevoHorario = document.createElement("div");
-                nuevoHorario.classList.add("horario");
-        
-                nuevoHorario.innerHTML = `
-                    <div class="form-group">
-                        <h5>Nuevo horario</h5>
-                        <label>Horario de entrada:</label>
-                        <input type="time" name="entrada" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Horario de salida:</label>
-                        <input type="time" name="salida" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Días de trabajo:</label>
-                        <div class="dias-container">
-                            <input type="checkbox" name="lunes"><label>Lunes</label>
-                            <input type="checkbox" name="martes"><label>Martes</label>
-                            <input type="checkbox" name="miercoles"><label>Miércoles</label>
-                            <input type="checkbox" name="jueves"><label>Jueves</label>
-                            <input type="checkbox" name="viernes"><label>Viernes</label>
-                            <input type="checkbox" name="sabado"><label>Sábado</label>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-delete">Eliminar</button>
-                `;
-        
-                // Agregar evento para eliminar
-                nuevoHorario.querySelector(".btn-delete").addEventListener("click", function () {
-                    nuevoHorario.remove();
-                });
-        
-                horarioContainer.appendChild(nuevoHorario);
-            });
-        
-            // Restablecer horario a los valores originales
-            document.getElementById("resetHorario").addEventListener("click", function () {
-                let horarios = document.querySelectorAll(".horario");
-                horarios.forEach((horario, index) => {
-                    if (index === 0) { // Solo el primer horario vuelve a los valores originales
-                        horario.querySelector("[name='entrada']").value = entradaOriginal || "";
-                        horario.querySelector("[name='salida']").value = salidaOriginal || "";
-        
-                        let checkboxes = horario.querySelectorAll("input[type=checkbox]");
-                        checkboxes.forEach(checkbox => {
-                            checkbox.checked = diasOriginales[checkbox.name] || false;
-                        });
-                    } else {
-                        horario.remove(); // Los demás horarios agregados se eliminan
-                    }
-                });
-            });
         });
     </script>
 
@@ -536,55 +374,82 @@
         }        
     </script>
 
-    <!--Script para el botón de generar credenciales-->
     <script>
-        function generarContrasena() {
-            fetch('/generar_contrasena')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('contrasena').value = data.contrasena;
-            })
-            .catch(error => console.error('Error:', error));
+        // JavaScript simplificado
+        function toggleDropdown() {
+            document.getElementById("myDropdown").classList.toggle("show");
         }
+        
+        window.onclick = function(event) {
+            const dropdown = document.getElementById("myDropdown");
+            if (dropdown && !event.target.classList.contains(".custom-dropdown")) {  
+                dropdown.classList.remove("show");
+            }
+        };
+        
     </script>
 
-    <!--Script para editar y eliminar-->
+    <!--Script para el botón de generar credenciales-->
     <script>
-        document.getElementById('editarIcono').addEventListener('click', abrirModalEditar);
-        document.getElementById('eliminarIcono').addEventListener('click', eliminarRegistro);
-
-        function abrirModalEditar() {
-            // Obtener el modal
-            const modal = document.getElementById('myModal');
-            // Mostrar el modal
-            modal.style.display = 'block';
+        // Función para generar credenciales
+        function generarContrasena() {
+            const nombreInput = document.getElementById('nombre');
+            if (!nombreInput) return;
+    
+            const nombreCompleto = nombreInput.value.trim().toLowerCase();
+            let usuarioGenerado = '';
+    
+            // Generar usuario a partir del nombre completo
+            if (nombreCompleto) {
+                const partes = nombreCompleto.split(' ');
+                const nombres = [];
+                const apellidos = [];
+    
+                // Identificar nombres y apellidos
+                if (partes.length >= 4) {
+                    nombres.push(partes[0], partes[1]); // Primer y segundo nombre
+                    apellidos.push(partes[2], partes[3]); // Primer y segundo apellido
+                } else if (partes.length === 3) {
+                    nombres.push(partes[0]); // Primer nombre
+                    apellidos.push(partes[1], partes[2]); // Primer y segundo apellido
+                } else {
+                    nombres.push(...partes.slice(0, Math.ceil(partes.length / 2))); // Mitad para nombres
+                    apellidos.push(...partes.slice(Math.ceil(partes.length / 2))); // Mitad para apellidos
+                }
+    
+                // Tomar las primeras 2 letras de cada componente
+                const componentes = [...nombres, ...apellidos];
+                usuarioGenerado = componentes.map(palabra =>
+                    palabra.substring(0, 2) // Tomar primeras 2 letras
+                ).join('');
+    
+                // Limitar a 8 caracteres y rellenar si es necesario
+                usuarioGenerado = usuarioGenerado.substring(0, 8).padEnd(8, 'x');
+                document.getElementById('usuario').value = usuarioGenerado;
+            } else {
+                // Si no hay nombre, generar un usuario aleatorio
+                usuarioGenerado = generarUsuarioAleatorio();
+                document.getElementById('usuario').value = usuarioGenerado;
+            }
+    
+            // Generar contraseña aleatoria
+            fetch('/generar_contrasena')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('contrasena').value = data.contrasena;
+                })
+                .catch(error => console.error('Error:', error));
         }
-
-        // Obtener el botón de cerrar
-        const closeButton = document.querySelector('.close');
-
-        // Cerrar el modal al hacer clic en la "X"
-        closeButton.addEventListener('click', () => {
-            const modal = document.getElementById('myModal');
-            modal.style.display = 'none';
-        });
-
-        // Cerrar el modal al hacer clic fuera de él
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('myModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-
-        function eliminarRegistro() {
-            const confirmacion = confirm('¿Estás seguro de que deseas eliminar este registro?');
-            if (confirmacion) {
-                // Lógica para eliminar el registro
-                console.log('Registro eliminado');
-            }
+    
+        // Función para generar un usuario aleatorio
+        function generarUsuarioAleatorio() {
+            const prefijos = ["user", "emp", "colab", "staff"];
+            const randomPrefijo = prefijos[Math.floor(Math.random() * prefijos.length)];
+            const randomNum = Math.floor(Math.random() * 1000);
+            return `${randomPrefijo}${randomNum}`;
         }
     </script>
 </body>
 </html>
+
+

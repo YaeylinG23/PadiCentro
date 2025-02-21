@@ -1,16 +1,5 @@
     * {
-        margin: 0;
-        padding: 0;
         font-family: Arial, sans-serif;
-    }
-
-    body, html {
-        width: 100%;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f0f0f0;
     }
 
     .dashboard-container {
@@ -23,13 +12,18 @@
     }
 
     .header-blue {
-        background: #014CB9;
-        color: #F9D007;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1.5rem;
-        padding: 1.5rem;
-        position: relative;
+        width: 100%;
+        height: 150px; /* Ajusta según el diseño */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+    
+    .header-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Recorta la imagen para llenar el espacio */
     }
 
     .top-bar {
@@ -46,11 +40,11 @@
 
     .logo-container {
         position: absolute;
-        top: -5rem;
+        top: -4.5rem;
         left: 8%;
         transform: translateX(-50%);
-        padding: 1rem;
-        z-index: 3;
+        padding: 1.9rem;
+        z-index: 2;
     }
 
     .logo-container img {
@@ -59,71 +53,132 @@
     }
 
     .welcome-text {
-        flex: 1;
-        text-align: left;
+        display: inline-block;
+        background: linear-gradient(135deg, #014CB9, #469bc9); /* Degradado azul */
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
         font-weight: bold;
-        font-size: 20px;
-        margin-left: 220px; /* Ajusta si es necesario */
+        text-decoration: none;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(75, 158, 255, 0.3);
+        cursor: pointer;
+        border: none;
+        margin-left: 190px;
     }
+    
+    .welcome-text:hover {
+        background: linear-gradient(135deg, #014CB9, #014CB9);
+        box-shadow: 0 6px 15px rgba(75, 158, 255, 0.5);
+        transform: scale(1.05);
+    }
+    
+    .welcome-text:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 5px rgba(75, 158, 255, 0.2);
+    }
+    
     .welcome-text2 {
         text-align: center;
         font-weight: bold;
         font-size: 20px;
     }
 
-    .logout-button {
-        text-decoration: none;
-        color: white;
+    /*Texto*/
+    h4{
+        font-size: 25px;
+        text-align: center;
         font-weight: bold;
-        font-size: 1.2rem;
-        z-index: 2;
+    }
+
+    .logout-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff4b5c, #ff6b81); /* Degradado en tonos rojos */
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(255, 75, 92, 0.3);
+        border: none;
+    }
+    
+    .logout-button:hover {
+        background: linear-gradient(135deg, #e63e50, #ff4b5c);
+        box-shadow: 0 6px 15px rgba(255, 75, 92, 0.5);
+        transform: scale(1.05);
+    }
+    
+    .logout-button:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 5px rgba(255, 75, 92, 0.2);
     }
 
     /* Ajustar el espaciado general del contenedor */
     .content {
-        padding: 1.5rem; /* Reducido de 2rem a 1rem */
         display: flex;
         z-index: 2;
-        gap: 10px; /* Reducido el espacio entre botones */
+        gap: 10px;
         flex-wrap: wrap;
     }
-
+    
     /* Ajustar la separación de la tabla */
     .content2 {
         padding: 0.5rem; /* Reducido aún más */
         z-index: 1;
-        margin-top: -10px; /* Reducir espacio con la tabla */
+        margin-top: 20px; /* Reducir espacio con la tabla */
     }
     
     .decorations {
         position: absolute;
         width: 100%;
-        height: 100%;
         top: 0;
         left: 0;
         pointer-events: none;
-        z-index: 1; /* Asegura que las decoraciones estén detrás del contenido */
+        z-index: 1; /* Mantener detrás del contenido */
     }
-
+    
     .decorations img {
-        position: fixed;
-        width: 10rem;
+        width: 7rem;
         z-index: 1;
     }
-
-    .top-left { left: 5px; top: 12rem; }
-    .top-right { right: 0px; top: 12rem; }
-    .bottom-left { left: 0; bottom: 0; }
-    .bottom-right { right: 0px; bottom: 0px; }
-
-    .top-right { transform: scaleY(-1); }
-    .bottom-left { transform: rotate(180deg) scaleY(-1); }
+    
+    /* Decoraciones superiores (mantener pegadas al navbar) */
+    .top-left { 
+        position: absolute; /* Asegura que esté dentro del navbar */
+        left: 5px; 
+        top: 14.5rem;  
+    }
+    
+    .top-right { 
+        position: absolute;
+        right: 0px; 
+        top: 14.5rem;   
+        transform: scaleY(-1); 
+    }
+    
+    /* Decoraciones inferiores (fijas en la parte inferior de la pantalla) */
+    .bottom-left, .bottom-right { 
+        position: fixed; /* Para que se mantengan fijas al desplazarse */
+        bottom: 0; 
+    }
+    
+    .bottom-left { 
+        left: 0; 
+        transform: rotate(180deg) scaleY(-1); 
+    }
+    
+    .bottom-right { 
+        right: 0px; 
+    }
+    
 
     /* Estilos para los botones */
     .button-container {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 15px; /* Espaciado entre los botones */
+        margin-top: 20px;
     }
 
     .button-container > a {
@@ -138,7 +193,7 @@
         font-weight: bold;
         transition: background-color 0.3s ease, transform 0.2s ease;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        border: 4px solid; /* Borde más grueso */
+        border: 4px solid;
     }
 
     .button-container > a i {
@@ -230,8 +285,11 @@
 
     /* Contenedor del menú desplegable */
     .dropdown {
-        position: relative;
-        display: inline-block;
+        display: flex;
+        justify-content: center; /* Centra los botones horizontalmente */
+        align-items: center; /* Asegura que estén alineados verticalmente */
+        gap: 15px; /* Espaciado entre los botones */
+        margin-top: 20px;
     }
 
     /* Botón del menú */
@@ -246,6 +304,7 @@
         border: 4px solid #F9D007;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
         transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 300px;
     }
 
     /* Cambio de color al pasar el mouse */
@@ -281,6 +340,7 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background 0.3s;
+        font-weight: normal;
     }
 
     /* Separación de los checkboxes */
@@ -372,27 +432,16 @@
         margin-bottom: 5px;
     }
 
-    button {
-        background-color: #007bff;
-        color: white;
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        width: 100%;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-
     /*Botón del horario*/
     .btn-horario {
     padding: 10px 20px;
+    width: 150px;
     background-color: #4DAD33;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
+    margin-bottom: 10px;
     }
     
     .btn-horario:hover {
@@ -441,7 +490,7 @@
         width: 200px; /* Ancho reducido */
         background-color: #014CB9;
         color: white;
-        border-radius: 5px;
+        border-radius: 50px;
         padding: 10px;
         border: none;
         font-size: 16px;
@@ -456,7 +505,7 @@
         width: 150px; /* Ancho fijo */
         background-color: #FF000B;
         color: white;
-        border-radius: 5px;
+        border-radius: 50px;
         padding: 10px;
         border: none;
         font-size: 16px;
@@ -469,38 +518,24 @@
         background-color: #4DAD33;
     }
 
-    .btn-cerrar2 {
-        background-color: #4DAD33;
-        color: white;
-        border-radius: 5px;
-        width: 100px;
-    }
-    
-    .btn-guardar2 {
-        background-color: #4DAD33;
-        color: white;
-        border-radius: 5px;
-        width: 100px;
-    }
-
     .btn-restablecer {
         background-color: #e4c112;
         color: white;
-        border-radius: 5px;
+        border-radius: 50px;
         width: 100px;
     }
     
     .btn-agregar {
         background-color: #014CB9;
         color: white;
-        border-radius: 5px;
+        border-radius: 50px;
         width: 100px;
     }
 
     .btn-delete {
         background-color: #831616;
         color: white;
-        border-radius: 5px;
+        border-radius: 50px;
         width: 100px;
     }
 
@@ -528,20 +563,28 @@
         background-color: darkred;
     }
 
-    /*Estilos de alineación para botones*/
-    .button-group {
-        display: flex; /* Activa Flexbox */
-        gap: 10px; /* Espacio entre los botones */
-    }
-    
-    .button-group button {
-        flex: 1; /* Hace que cada botón ocupe el mismo espacio */
-        padding: 10px; /* Añade un padding para mejor apariencia */
-        border: none; /* Elimina el borde por defecto */
-        border-radius: 5px; /* Bordes redondeados */
-        font-size: 16px; /* Tamaño de fuente */
-        cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
-    }
+    /* Contenedor de botones alineados */
+.button-group {
+    display: flex; /* Activa Flexbox */
+    gap: 10px; /* Espacio entre los botones */
+    justify-content: center; /* Centra los botones horizontalmente */
+    align-items: center; /* Alinea los botones verticalmente */
+}
+
+/* Estilos uniformes para los botones */
+.button-group button,
+.button-group .btn-custom-2 { /* Para asegurar que otros tipos de botones también se alineen */
+    flex: 1; /* Hace que los botones ocupen el mismo espacio dentro del contenedor */
+    min-width: 150px; /* Define un ancho mínimo */
+    max-width: 200px; /* Define un ancho máximo si es necesario */
+    padding: 12px 20px; /* Espaciado interno */
+    border: none; /* Sin bordes */
+    border-radius: 50px; /* Bordes redondeados */
+    font-size: 16px; /* Tamaño de la fuente */
+    cursor: pointer; /* Cambia el cursor */
+    text-align: center; /* Asegura que el texto esté centrado */
+    white-space: nowrap; /* Evita que el texto se desborde en varias líneas */
+}
 
     h5{
         font-size: 18px;
@@ -620,4 +663,101 @@
 
 .horario-item {
     padding: 4px 0;
+}
+
+/* Contenedor del modal para el mapache*/
+.modal3 {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ajusta el modal para que esté por encima */
+.modal-content3 {
+    background: white;
+    padding: 25px;
+    border-radius: 40px;
+    text-align: center;
+    position: relative;
+    width: 380px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: revert-layer;
+
+    /* Borde solo en la parte derecha y en la parte baja */
+    border-right: 5px solid #014CB9;
+    border-bottom: 5px solid #014CB9;
+}
+
+.raccoon-image {
+    width: 240px;
+    position: absolute;
+    top: -207px;
+    left: 48%;
+    transform: translateX(-50%);
+    z-index: -1;
+}
+
+.warning-icon {
+    width: 55px;
+    height: 55px;
+    background-color: red;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    margin: 11px auto;
+}
+
+
+p{
+    margin-top: 0px;
+    margin-bottom: 0rem;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+}
+
+/* Botones */
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px; /* Espaciado entre botones */
+    margin-top: 20px;
+}
+
+.buttons button {
+    flex: 1; /* Hace que los botones tengan el mismo tamaño */
+    max-width: 120px; /* Define un ancho máximo para que no sean demasiado grandes */
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.cancel-button {
+    background: red;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.confirm-button {
+    background: #0F6194;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
 }

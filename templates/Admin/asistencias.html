@@ -14,14 +14,30 @@
     <!--Navbar-->
     <div class="dashboard-container">
         <div class="header-blue">
-            MI DISCIPLINA Y PASIÓN ME DAN LA OPORTUNIDAD DE <br> CAMBIAR LA VIDA DE MILES DE PERSONAS, INCLUYENDO LA MÍA.
+            <img src="./static/img/encabezado.png" alt="Encabezado" class="header-image">
         </div>
         <div class="top-bar">
             <div class="logo-container">
                 <img src="./static/img/logo_prin.png" alt="Logo">
             </div>
             <span class="welcome-text" onclick="window.location.href='{{ url_for('dashboard_admin') }}'" style="cursor: pointer;">Regresar</span>
-            <a href="#" class="logout-button" onclick="confirmLogout()">Cerrar sesión</a>
+            <!-- Botón para cerrar sesión -->
+            <a href="#" class="logout-button" onclick="openLogoutModal()">Cerrar sesión</a>
+
+            <!-- Modal de confirmación -->
+            <div id="logoutModal" class="modal">
+                <div class="modal-content">
+                    <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image">
+                    <div class="warning-icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>                    
+                    <p>¿Quiere cerrar la sesión?</p>
+                    <div class="buttons">
+                        <button class="cancel-button" onclick="closeLogoutModal()">Cancelar</button>
+                        <button class="confirm-button" onclick="logout()">Cerrar sesión</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div>
@@ -36,37 +52,39 @@
         <h4>Del 01 al 31 de enero del 2025 </h4>
         <br>
         <!-- Contenido del dashboard -->
-        <div class="content">
+        <div class="button-container">
             <div class="dropdown">
-                <!-- Botón desplegable -->
+                <!-- Botón con icono -->
                 <button onclick="toggleDropdown()" class="dropbtn">
                     Seleccionar usuarios <i class="fa-solid fa-angle-down"></i>
                 </button>
-                <!-- Menú desplegable -->
                 <div id="dropdownMenu" class="dropdown-content">
-                    <label><input type="checkbox"> Opción 1</label>
-                    <label><input type="checkbox"> Opción 2</label>
-                    <label><input type="checkbox"> Opción 3</label>
+                    {% for colaborador in colaboradores %}
+                    <label>
+                        <input type="checkbox" class="empleado-checkbox" value="{{ colaborador[0] }}">
+                        {{ colaborador[1] }} ({{ colaborador[8] }})
+                    </label>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="">
                 <!-- Botón  -->
-                <button class="dropbtn">
+                <button class="dropbtn3">
                     Seleccionar rango <i class="fa-solid fa-calendar-days"></i>
                 </button>
             </div>
 
             <div class="">
                 <!-- Botón  -->
-                <button class="dropbtn3">
+                <button class="dropbtn4">
                     Validar permisos <i class="fa-solid fa-calendar-minus"></i>
                 </button>
             </div>
 
             <div class="">
                 <!-- Botón  -->
-                <button class="dropbtn4">
+                <button class="dropbtn">
                     Validar vacaciones <i class="fa-solid fa-calendar-minus"></i>
                 </button>
             </div>
@@ -81,7 +99,7 @@
                         <th>Id</th>
                         <th>Nombre completo</th>
                         <th>Departamento</th>
-                        <th>Aquí van los días</th>
+                        <th>Reporte por días</th>
                         <th>Cantidad de retardos</th>
                         <th>Minutos de retardo</th>
                         <th>Minutos de salidas temprano</th>
@@ -97,35 +115,39 @@
                         <td>Juan Pérez</td>
                         <td>Dirección</td>
                         <td>
-                            <!-- Tabla interna con scroll horizontal -->
-                            <div class="scrollable-table">
-                                <table>
-                                    <table>
-                                        <!-- Primera fila: Fechas -->
-                                        <tr>
-                                            <th colspan="2" class="fecha">06/01/2025</th>
-                                            <th colspan="2" class="fecha">07/01/2025</th>
-                                        </tr>
-                                        <!-- Segunda fila: Días de la semana -->
-                                        <tr>
-                                            <th colspan="2">Lunes</th>
-                                            <th colspan="2">Martes</th>
-                                        </tr>
-                                        <!-- Tercera fila: Encabezados de horarios -->
-                                        <tr>
-                                            <th>H. Entrada</th>
-                                            <th>H. Salida</th>
-                                            <th>H. Entrada</th>
-                                            <th>H. Salida</th>
-                                        </tr>
-                                        <!-- Cuarta fila: Datos de horarios -->
-                                        <tr>
-                                            <td class="horario">9:25 am</td>
-                                            <td class="horario">8:00 pm</td>
-                                            <td class="horario">9:25 am</td>
-                                            <td class="horario">7:25 pm</td>
-                                        </tr>
-                                </table>
+                            <!-- Botón para abrir el modal -->
+                            <button class="btn-ver-detalles" onclick="abrirModal()">Ver Detalles</button>
+
+                            <!-- Modal -->
+                            <div id="miModal" class="modal2">
+                                <div class="modal-content2">
+                                    <span class="close" onclick="cerrarModal()">&times;</span>
+                                    <h3>Detalles del Reporte</h3>
+                                    <div class="scrollable-table">
+                                        <table>
+                                            <tr>
+                                                <th colspan="2" class="fecha">06/01/2025</th>
+                                                <th colspan="2" class="fecha">07/01/2025</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2">Lunes</th>
+                                                <th colspan="2">Martes</th>
+                                            </tr>
+                                            <tr>
+                                                <th>H. Entrada</th>
+                                                <th>H. Salida</th>
+                                                <th>H. Entrada</th>
+                                                <th>H. Salida</th>
+                                            </tr>
+                                            <tr>
+                                                <td class="horario">9:25 am</td>
+                                                <td class="horario">8:00 pm</td>
+                                                <td class="horario">9:25 am</td>
+                                                <td class="horario">7:25 pm</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                         <td>5</td>
@@ -151,13 +173,16 @@
 
     <!--Script para cerrar sesión-->
     <script>
-        function confirmLogout() {
-            const confirmLogout = confirm("¿Estás seguro de que quieres cerrar sesión?");
-            if (confirmLogout) {
-                window.location.href = "{{ url_for('logout') }}";
-            } else {
-                return false;
-            }
+        function openLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        function logout() {
+            window.location.href = "{{ url_for('logout') }}"; // Redirige a la ruta de logout
         }
     </script>
 
@@ -188,6 +213,16 @@
                 }
             }
         }        
+    </script>
+
+    <script>
+        function abrirModal() {
+            document.getElementById("miModal").style.display = "block";
+        }
+
+        function cerrarModal() {
+            document.getElementById("miModal").style.display = "none";
+        }
     </script>
 </body>
 </html>

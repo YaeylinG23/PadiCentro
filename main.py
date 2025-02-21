@@ -34,7 +34,7 @@ app.json = app.json_provider_class(app)
 host='localhost'
 database='postgres2'
 user='postgres'
-password='Padi02'
+password='024689'
 
 
 #Conexión con el login
@@ -151,7 +151,7 @@ def añadir_empleados():
             with psycopg2.connect(
                 dbname="postgres2",
                 user="postgres",
-                password="Padi02",
+                password="024689",
                 host="localhost"
             ) as conn:
                 with conn.cursor() as cur:
@@ -207,7 +207,7 @@ def añadir_empleados():
         with psycopg2.connect(
             dbname="postgres2",
             user="postgres",
-            password="Padi02",
+            password="024689",
             host="localhost"
         ) as conn:
             with conn.cursor() as cur:
@@ -229,6 +229,7 @@ def añadir_empleados():
                     FROM colaboradores c
                     LEFT JOIN horarios h ON c.id_uem = h.id_uem_fk
                     GROUP BY c.id_uem
+                    ORDER BY c.nombre_completo ASC
                 """)
                 colaboradores = []
                 for row in cur.fetchall():
@@ -250,6 +251,11 @@ def añadir_empleados():
 @app.route('/asistencias')
 def asistencias():
     return render_template('Admin/asistencias.html')
+
+# Ruta para historial de empleados (Admin)
+@app.route('/historial_empleados')
+def historial_empleados():
+    return render_template('Admin/historial_empleados.html')
 
 #Botón para generar credenciales
 def generar_contrasena(longitud=12):
@@ -275,7 +281,7 @@ def gestion_empleados():
             with psycopg2.connect(
                 dbname="postgres2",
                 user="postgres",
-                password="Padi02",
+                password="024689",
                 host="localhost"
             ) as conn:
                 with conn.cursor() as cur:
@@ -297,6 +303,7 @@ def gestion_empleados():
                         FROM colaboradores c
                         LEFT JOIN horarios h ON c.id_uem = h.id_uem_fk
                         GROUP BY c.id_uem
+                        ORDER BY c.nombre_completo ASC
                     """)
                     colaboradores = []
                     for row in cur.fetchall():
@@ -324,7 +331,7 @@ def eliminar_colaborador(id_uem):
         with psycopg2.connect(
             dbname="postgres2",
             user="postgres",
-            password="Padi02",
+            password="024689",
             host="localhost"
         ) as conn:
             with conn.cursor() as cur:
@@ -362,7 +369,7 @@ def obtener_colaborador(id_uem):
         with psycopg2.connect(
             dbname="postgres2",
             user="postgres",
-            password="Padi02",
+            password="024689",
             host="localhost"
         ) as conn:
             with conn.cursor() as cur:
@@ -422,7 +429,7 @@ def actualizar_colaborador(id_uem):
         with psycopg2.connect(
             dbname="postgres2",
             user="postgres",
-            password="Padi02",
+            password="024689",
             host="localhost"
         ) as conn:
             with conn.cursor() as cur:

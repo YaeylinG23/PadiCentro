@@ -40,7 +40,7 @@
 
 .logo-container {
     position: absolute;
-    top: -4.5rem;
+    top: -5rem;
     left: 8%;
     transform: translateX(-50%);
     padding: 1.9rem;
@@ -137,10 +137,12 @@ h4{
     top: 0;
     left: 0;
     pointer-events: none;
+    z-index: 1; /* Mantener detrás del contenido */
 }
 
 .decorations img {
     width: 7rem;
+    z-index: 1;
 }
 
 /* Decoraciones superiores (mantener pegadas al navbar) */

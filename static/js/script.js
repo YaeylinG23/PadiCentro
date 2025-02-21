@@ -190,37 +190,31 @@ function abrirModalEditar(id_uem) {
 }
 
 
-// Función para eliminar un colaborador
-function eliminarRegistro(id_uem) {
-    if (confirm('¿Estás seguro de eliminar este registro?')) {
-        fetch(`/eliminar_colaborador/${id_uem}`, { method: 'DELETE' })
-        .then(response => {
-            if (!response.ok) throw new Error('Error en la respuesta del servidor');
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                document.getElementById('myModal').style.display = 'none';
-                location.reload();
-            } else {
-                alert('Error al eliminar: ' + (data.error || ''));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error de conexión');
-        });
+document.addEventListener("DOMContentLoaded", function() {
+    // Función que filtra las filas de la tabla
+    function filterTable() {
+      // Obtener los IDs seleccionados de los checkboxes
+      const selectedIds = Array.from(document.querySelectorAll('.empleado-checkbox:checked'))
+                                .map(cb => parseInt(cb.value));
+      console.log("IDs seleccionados:", selectedIds);
+  
+      // Recorrer cada fila y mostrarla u ocultarla según corresponda
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const rowId = parseInt(row.dataset.id);
+        if (selectedIds.length === 0 || selectedIds.includes(rowId)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
     }
-}
-
-// Eventos para botones de editar y eliminar en la tabla
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.btn-editar')) {
-        const id_uem = e.target.closest('.btn-editar').getAttribute('data-id');
-        abrirModalEditar(id_uem);
-    }
-    if (e.target.closest('.btn-eliminar')) {
-        const id_uem = e.target.closest('.btn-eliminar').getAttribute('data-id');
-        eliminarRegistro(id_uem);
-    }
-});
+  
+    // Asignar el listener a cada checkbox
+    document.querySelectorAll('.empleado-checkbox').forEach(cb => {
+      cb.addEventListener('change', filterTable);
+    });
+  
+    // Llamamos a filterTable al cargar la página para que se aplique el estado guardado
+    filterTable();
+  });
+  

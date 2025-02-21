@@ -1,16 +1,5 @@
 * {
-    margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
-}
-
-body, html {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
 }
 
 .dashboard-container {
@@ -19,15 +8,22 @@ body, html {
     background: white;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .header-blue {
-    background: #014CB9;
-    color: #F9D007;
-    text-align: center;
-    font-weight: bold;
-    font-size: 23px;
-    padding: 25px;
+    width: 100%;
+    height: 150px; /* Ajusta según el diseño */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.header-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Recorta la imagen para llenar el espacio */
 }
 
 .top-bar {
@@ -35,42 +31,91 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 19px 50px;
+    padding: 1rem 2rem;
     color: white;
-    position: relative; /* Asegura que el logo se posicione respecto a esta barra */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Sombra sutil */
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+
 }
 
 .logo-container {
     position: absolute;
-    top: -78px; /* Ajusta la posición sobre la barra */
+    top: -5rem;
     left: 8%;
     transform: translateX(-50%);
-    padding: 10px;
-    z-index: 10;
+    padding: 1.9rem;
+    z-index: 3;
 }
 
 .logo-container img {
-    height: 200px; /* Ajusta el tamaño */
-    width: 200px;
+    height: 10rem;
+    width: 10rem;
 }
 
 .welcome-text {
-    flex: 1;
-    text-align: left;
+    display: inline-block;
+    background: linear-gradient(135deg, #4b9eff, #6bcbff); /* Degradado azul */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(75, 158, 255, 0.3);
+    cursor: pointer;
+    border: none;
+    margin-left: 190px;
+}
+
+.welcome-text:hover {
+    background: linear-gradient(135deg, #3e8ee6, #4b9eff);
+    box-shadow: 0 6px 15px rgba(75, 158, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.welcome-text:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(75, 158, 255, 0.2);
+}
+
+.welcome-text2 {
+    text-align: center;
     font-weight: bold;
     font-size: 20px;
-    margin-left: 190px; /* Ajusta si es necesario */
+}
+
+/*Texto*/
+h4{
+    font-size: 25px;
+    text-align: center;
+    font-weight: bold;
 }
 
 .logout-button {
-    text-decoration: none;
+    display: inline-block;
+    background: linear-gradient(135deg, #ff4b5c, #ff6b81); /* Degradado en tonos rojos */
     color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
     font-weight: bold;
-    font-size: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(255, 75, 92, 0.3);
+    border: none;
 }
 
+.logout-button:hover {
+    background: linear-gradient(135deg, #e63e50, #ff4b5c);
+    box-shadow: 0 6px 15px rgba(255, 75, 92, 0.5);
+    transform: scale(1.05);
+}
 
+.logout-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(255, 75, 92, 0.2);
+}
+
+/* Ajustar el espaciado general del contenedor */
 .content {
     padding: 20px;
     min-height: 400px;
@@ -80,54 +125,73 @@ body, html {
 .decorations {
     position: absolute;
     width: 100%;
-    height: 100%;
     top: 0;
     left: 0;
     pointer-events: none;
+    z-index: 1; /* Mantener detrás del contenido */
 }
 
 .decorations img {
-    position: fixed; 
-    width: 170px; /* Ajusta el tamaño según necesidad */
-    z-index: 1; /* Asegura que las decoraciones estén sobre los demás elementos */
+    width: 7rem;
+    z-index: 1;
 }
 
-/* Ajusta las posiciones para pegarlas a las esquinas */
-.top-left { left: 5px; top: 205px;}
-.top-right { right: 0px; top: 200px; }
-.bottom-left { left: 0; bottom: 0; }
-.bottom-right { right: 0px; bottom: 0px; }
+/* Decoraciones superiores (mantener pegadas al navbar) */
+.top-left { 
+    position: absolute; /* Asegura que esté dentro del navbar */
+    left: 5px; 
+    top: 14.5rem;  
+}
 
-/* Rotar las imágenes */
-.top-right { transform: scaleY(-1); } 
-.bottom-left { transform: rotate(180deg) scaleY(-1);} /* Gira 180° y voltea */
+.top-right { 
+    position: absolute;
+    right: 0px; 
+    top: 14.5rem;   
+    transform: scaleY(-1); 
+}
+
+/* Decoraciones inferiores (fijas en la parte inferior de la pantalla) */
+.bottom-left, .bottom-right { 
+    position: fixed; /* Para que se mantengan fijas al desplazarse */
+    bottom: 0; 
+}
+
+.bottom-left { 
+    left: 0; 
+    transform: rotate(180deg) scaleY(-1); 
+}
+
+.bottom-right { 
+    right: 0px; 
+}
 
 .button-container {
     display: flex;
     flex-direction: column;
-    gap: 35px; /* Aumenta el espacio entre los botones */
-    margin-top: 20px;
+    gap: 3rem;
+    margin-top: 6rem;
+    z-index: 2;
 }
 
 .button-container a {
     width: 100%;
-    max-width: 500px;
+    max-width: 40rem;
     margin: 0 auto;
     text-align: center;
-    padding: 15px;
+    padding: 1.3rem;
     border-radius: 50px;
     text-decoration: none;
     color: white;
-    font-size: 20px;
+    font-size: 1.5rem;
     font-weight: bold;
-    position: relative; /* Para posicionar los hexágonos */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Sombra debajo del botón */
-    transition: box-shadow 0.3s ease; /* Transición suave para el hover */
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: box-shadow 0.3s ease;
+    z-index: 2;
 }
 
-/* Colores personalizados para los botones */
 .btn-custom-1 {
-    background-color: #F9D007; /* Amarillo */
+    background-color: #F9D007;
     border: 1px solid #F9D007;
 }
 
@@ -137,19 +201,13 @@ body, html {
 }
 
 .btn-custom-3 {
-    background-color: #4DAD33; /* Verde */
+    background-color: #4DAD33;
     border: 1px solid #4DAD33;
 }
 
-/* Efecto hover para los botones */
 .btn-custom-1:hover {
     background-color: #e0b906;
     border-color: #e0b906;
-}
-
-.btn-custom-2:hover {
-    background-color: #013a8a;
-    border-color: #013a8a;
 }
 
 .btn-custom-3:hover {
@@ -157,59 +215,53 @@ body, html {
     border-color: #3d8c27;
 }
 
-/* Estilos para el hexágono base */
 .button-container a::before {
     content: "";
-    width: 90px;
-    height: 80px;
+    width: 7rem;
+    height: 6rem;
     background-color: inherit;
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     position: absolute;
-    top: -10px;
+    top: -0.5rem;
     left: 5%;
     transform: translateX(-50%);
     z-index: 2;
 }
 
-/* Hexágono en el lado derecho para el segundo y cuarto botón */
 .button-container a:nth-child(2)::before,
 .button-container a:nth-child(4)::before {
-    left: 95%; /* Mueve el hexágono al lado derecho */
+    left: 95%;
 }
 
-/* Estilos para el hexágono blanco */
 .button-container a::after {
     content: "";
-    width: 80px; /* Un poco más pequeño que el hexágono base */
-    height: 70px;
-    background-color: white; /* Color blanco */
+    width: 6.5rem;
+    height: 5.5rem;
+    background-color: white;
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     position: absolute;
-    top: -5px; /* Ajusta la posición para que esté encima */
+    top: -0.25rem;
     left: 5%;
     transform: translateX(-50%);
-    z-index: 3; /* Asegura que esté por encima del hexágono base */
+    z-index: 3;
 }
 
-/* Hexágono blanco en el lado derecho para el segundo y cuarto botón */
 .button-container a:nth-child(2)::after,
 .button-container a:nth-child(4)::after {
-    left: 95%; /* Mueve el hexágono blanco al lado derecho */
+    left: 95%;
 }
 
-/* Estilos para los íconos */
 .button-container a i {
     position: absolute;
     top: 50%;
-    left: 5%; /* Posición inicial para los íconos en el lado izquierdo */
+    left: 5%;
     transform: translate(-50%, -50%);
-    color: black; /* Color negro para los íconos */
-    font-size: 30px; /* Tamaño del ícono aumentado */
-    z-index: 4; /* Asegura que el ícono esté por encima de los hexágonos */
+    color: black;
+    font-size: 2.3rem;
+    z-index: 4;
 }
 
-/* Mover los íconos al lado derecho para el segundo y cuarto botón */
 .button-container a:nth-child(2) i,
 .button-container a:nth-child(4) i {
-    left: 95%; /* Mueve el ícono al lado derecho */
+    left: 95%;
 }

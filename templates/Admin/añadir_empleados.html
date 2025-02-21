@@ -15,14 +15,30 @@
     <!--Navbar-->
     <div class="dashboard-container">
         <div class="header-blue">
-            MI DISCIPLINA Y PASIÓN ME DAN LA OPORTUNIDAD DE <br> CAMBIAR LA VIDA DE MILES DE PERSONAS, INCLUYENDO LA MÍA.
+            <img src="./static/img/encabezado.png" alt="Encabezado" class="header-image">
         </div>
         <div class="top-bar">
             <div class="logo-container">
                 <img src="./static/img/logo_prin.png" alt="Logo">
             </div>
-            <span class="welcome-text" onclick="window.location.href='{{ url_for('dashboard_admin') }}'" style="cursor: pointer;">Regresar</span>
-            <a href="#" class="logout-button" onclick="confirmLogout()">Cerrar sesión</a>
+            <span class="welcome-text" onclick="window.location.href='{{ url_for('dashboard_admin') }}'">Regresar</span>
+            <!-- Botón para cerrar sesión -->
+            <a href="#" class="logout-button" onclick="openLogoutModal()">Cerrar sesión</a>
+
+            <!-- Modal de confirmación -->
+            <div id="logoutModal" class="modal3">
+                <div class="modal-content3">
+                    <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image">
+                    <div class="warning-icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>                    
+                    <p>¿Quiere cerrar la sesión?</p>
+                    <div class="buttons">
+                        <button class="cancel-button" onclick="closeLogoutModal()">Cancelar</button>
+                        <button class="confirm-button" onclick="logout()">Cerrar sesión</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div>
@@ -33,6 +49,8 @@
                 <img src="./static/img/decoración.png" class="bottom-right" alt="Decoración Inferior Derecha">
             </div>
         </div>
+        <br><br>
+        <h4>Lista de usuarios</h4>
         <br>
 
         <!-- Contenido del dashboard -->
@@ -42,11 +60,13 @@
                 <button onclick="toggleDropdown()" class="dropbtn">
                     Seleccionar usuarios <i class="fa-solid fa-angle-down"></i>
                 </button>
-                <!-- Menú desplegable -->
                 <div id="dropdownMenu" class="dropdown-content">
-                    <label><input type="checkbox"> Opción 1</label>
-                    <label><input type="checkbox"> Opción 2</label>
-                    <label><input type="checkbox"> Opción 3</label>
+                    {% for colaborador in colaboradores %}
+                    <label>
+                        <input type="checkbox" class="empleado-checkbox" value="{{ colaborador[0] }}">
+                        {{ colaborador[1] }} ({{ colaborador[8] }})
+                    </label>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -93,7 +113,7 @@
                                     <input type="date" id="contratacion" name="fecha_contratacion" placeholder="Ingresa la fecha de contratacion" required>
                                 </div>
                                 <div class="button-container2">
-                                    <label for="contratacion">Horario:</label>
+                                    <label for="contratacion">Horario:</label><br>
                                     <!-- Botón para abrir el modal -->
                                     <button type="button" class="btn-horario" id="openModalBtn2">
                                         Añadir horario
@@ -152,7 +172,7 @@
                                             <div class="button-group">
                                                 <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
                                                 <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
-                                                <button type="button" class="btn-cerrar2" id="cancelHorario">Guardar</button>
+                                                <button type="button" class="btn-guardar" id="cancelHorario">Guardar</button>
                                             </div>
                                         </div>
                                     </div>
@@ -183,7 +203,6 @@
             <!-- Contenedor de la tabla -->
             <div class="table-wrapper">
                 <table class="table-custom">
-                    <h5>Lista de usuarios</h5>
                     <thead>
                         <tr>
                             <th>Nombre completo</th>
@@ -204,7 +223,7 @@
                             <!-- Modifica el tbody de la tabla -->
                     <tbody>
                         {% for colaborador in colaboradores %}
-                        <tr>
+                        <tr data-id="{{ colaborador[0] }}">
                             <td>{{ colaborador[1] }}</td> <!-- nombre_completo -->
                             <td>{{ colaborador[8] }}</td> <!-- usuario -->
                             <td>{{ colaborador[9] }}</td> <!-- contrasena -->
@@ -275,13 +294,16 @@
 
     <!--Script para cerrar sesión-->
     <script>
-        function confirmLogout() {
-            const confirmLogout = confirm("¿Estás seguro de que quieres cerrar sesión?");
-            if (confirmLogout) {
-                window.location.href = "{{ url_for('logout') }}";
-            } else {
-                return false;
-            }
+        function openLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        function logout() {
+            window.location.href = "{{ url_for('logout') }}"; // Redirige a la ruta de logout
         }
     </script>
 
@@ -372,21 +394,6 @@
                 }
             }
         }        
-    </script>
-
-    <script>
-        // JavaScript simplificado
-        function toggleDropdown() {
-            document.getElementById("myDropdown").classList.toggle("show");
-        }
-        
-        window.onclick = function(event) {
-            const dropdown = document.getElementById("myDropdown");
-            if (dropdown && !event.target.classList.contains(".custom-dropdown")) {  
-                dropdown.classList.remove("show");
-            }
-        };
-        
     </script>
 
     <!--Script para el botón de generar credenciales-->

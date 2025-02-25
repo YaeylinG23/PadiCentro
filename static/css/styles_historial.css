@@ -40,7 +40,7 @@
 
 .logo-container {
     position: absolute;
-    top: -5rem;
+    top: -4.5rem;
     left: 8%;
     transform: translateX(-50%);
     padding: 1.9rem;
@@ -116,33 +116,32 @@ h4{
 }
 
 /* Ajustar el espaciado general del contenedor */
-.content {
-    padding: 1.5rem; /* Reducido de 2rem a 1rem */
+.container {
     display: flex;
-    z-index: 2;
-    gap: 10px; /* Reducido el espacio entre botones */
-    flex-wrap: wrap;
+    flex-direction: column;
+    min-height: 100vh; /* Asegura que ocupe toda la pantalla */
+}
+
+.content {
+    flex: 1; /* Permite que el contenido crezca y empuje las decoraciones abajo */
+    padding: 20px;
+}
+
+.decorations-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
 }
 
 /* Ajustar la separación de la tabla */
 .content2 {
     padding: 0.5rem; /* Reducido aún más */
     z-index: 1;
-    margin-top: -10px; /* Reducir espacio con la tabla */
-}
-
-.decorations {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 1; /* Mantener detrás del contenido */
+    margin-top: 15px; /* Reducir espacio con la tabla */
 }
 
 .decorations img {
     width: 7rem;
-    z-index: 1;
 }
 
 /* Decoraciones superiores (mantener pegadas al navbar) */
@@ -161,17 +160,19 @@ h4{
 
 /* Decoraciones inferiores (fijas en la parte inferior de la pantalla) */
 .bottom-left, .bottom-right { 
-    position: fixed; /* Para que se mantengan fijas al desplazarse */
-    bottom: 0; 
+    width: 7rem; /* Ajusta el tamaño de los elementos decorativos */
+    position: relative; /* Mantener en el flujo normal */
 }
 
 .bottom-left { 
-    left: 0; 
+    align-self: flex-start; /* Asegura que esté en la esquina izquierda */
+    margin-left: -10px; /* Ajusta según sea necesario */
     transform: rotate(180deg) scaleY(-1); 
 }
 
-.bottom-right { 
-    right: 0px; 
+.bottom-right {
+    align-self: flex-end; /* Asegura que esté en la esquina derecha */
+    margin-right: -10px; /* Ajusta según sea necesario */
 }
 
 

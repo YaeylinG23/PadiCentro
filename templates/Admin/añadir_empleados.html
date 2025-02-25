@@ -45,8 +45,6 @@
             <div class="decorations">
                 <img src="./static/img/decoración_l.png" class="top-left" alt="Decoración Superior Izquierda">
                 <img src="./static/img/decoración.png" class="top-right" alt="Decoración Superior Derecha">
-                <img src="./static/img/decoración.png" class="bottom-left" alt="Decoración Inferior Izquierda">
-                <img src="./static/img/decoración.png" class="bottom-right" alt="Decoración Inferior Derecha">
             </div>
         </div>
         <br><br>
@@ -166,14 +164,14 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div> 
+                                        </div>
+                                        <br>
+                                                <div class="button-group">
+                                                    <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
+                                                    <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
+                                                    <button type="button" class="btn-guardar" id="cancelHorario">Guardar</button>
+                                                </div> 
                                         <div>
-                                            <br>
-                                            <div class="button-group">
-                                                <button type="button" class="btn-agregar" id="addHorario">Agregar</button>
-                                                <button type="button" class="btn-restablecer" id="resetHorario">Restablecer</button>
-                                                <button type="button" class="btn-guardar" id="cancelHorario">Guardar</button>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -277,6 +275,20 @@
                             <td>
                                 <i class="fas fa-edit btn-editar" data-id="{{ colaborador[0] }}"></i>
                                 <i class="fas fa-trash btn-eliminar" data-id="{{ colaborador[0] }}"></i>
+                                <!-- Modal de confirmación para eliminar -->
+                                <div id="deleteModal" class="modal4" >
+                                    <div class="modal-content4">
+                                        <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image4">
+                                        <div class="warning-icon4">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                        </div>                    
+                                        <p>¿Estás seguro de que deseas eliminar este registro?</p>
+                                        <div class="buttons">
+                                            <button class="cancel-button" id="cancelDelete">Cancelar</button>
+                                            <button class="confirm-button" id="confirmDelete">Eliminar</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>                            
                         </tr>
                         {% endfor %}
@@ -290,6 +302,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="decorations-container">
+        <img src="./static/img/decoración.png" class="bottom-left">
+        <img src="./static/img/decoración.png" class="bottom-right">
     </div>
 
     <!--Script para cerrar sesión-->
@@ -318,6 +334,14 @@
     
     <!--Script para el modal-->
     <script>
+        // Función para resetear el formulario
+        function resetFormulario() {
+            const form = document.getElementById("empleadoForm");
+            if (form) {
+                form.reset();
+                document.getElementById("id_uem").value = "";
+            }
+        }
         // Obtener referencias a los elementos del DOM
         const openModalBtn = document.getElementById('openModalBtn');
         const modal = document.getElementById('myModal');
@@ -325,19 +349,8 @@
 
         // Abrir el modal cuando se hace clic en el botón
         openModalBtn.addEventListener('click', () => {
+            resetFormulario();
             modal.style.display = 'block';
-        });
-
-        // Cerrar el modal cuando se hace clic en la "X"
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        // Cerrar el modal si se hace clic fuera del contenido del modal
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
         });
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -398,7 +411,6 @@
 
     <!--Script para el botón de generar credenciales-->
     <script>
-        // Función para generar credenciales
         function generarContrasena() {
             const nombreInput = document.getElementById('nombre');
             if (!nombreInput) return;
@@ -406,56 +418,93 @@
             const nombreCompleto = nombreInput.value.trim().toLowerCase();
             let usuarioGenerado = '';
     
-            // Generar usuario a partir del nombre completo
             if (nombreCompleto) {
                 const partes = nombreCompleto.split(' ');
                 const nombres = [];
                 const apellidos = [];
-    
-                // Identificar nombres y apellidos
+                
                 if (partes.length >= 4) {
-                    nombres.push(partes[0], partes[1]); // Primer y segundo nombre
-                    apellidos.push(partes[2], partes[3]); // Primer y segundo apellido
+                    nombres.push(partes[0], partes[1]);
+                    apellidos.push(partes[2], partes[3]);
                 } else if (partes.length === 3) {
-                    nombres.push(partes[0]); // Primer nombre
-                    apellidos.push(partes[1], partes[2]); // Primer y segundo apellido
+                    nombres.push(partes[0]);
+                    apellidos.push(partes[1], partes[2]);
                 } else {
-                    nombres.push(...partes.slice(0, Math.ceil(partes.length / 2))); // Mitad para nombres
-                    apellidos.push(...partes.slice(Math.ceil(partes.length / 2))); // Mitad para apellidos
+                    nombres.push(...partes.slice(0, Math.ceil(partes.length/2)));
+                    apellidos.push(...partes.slice(Math.ceil(partes.length/2)));
                 }
     
-                // Tomar las primeras 2 letras de cada componente
                 const componentes = [...nombres, ...apellidos];
-                usuarioGenerado = componentes.map(palabra =>
-                    palabra.substring(0, 2) // Tomar primeras 2 letras
-                ).join('');
-    
-                // Limitar a 8 caracteres y rellenar si es necesario
-                usuarioGenerado = usuarioGenerado.substring(0, 8).padEnd(8, 'x');
-                document.getElementById('usuario').value = usuarioGenerado;
-            } else {
-                // Si no hay nombre, generar un usuario aleatorio
-                usuarioGenerado = generarUsuarioAleatorio();
+                usuarioGenerado = componentes.map(palabra => palabra.substring(0, 2)).join('');
+                usuarioGenerado = `P${usuarioGenerado}`;
                 document.getElementById('usuario').value = usuarioGenerado;
             }
     
-            // Generar contraseña aleatoria
             fetch('/generar_contrasena')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('contrasena').value = data.contrasena;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    
-        // Función para generar un usuario aleatorio
-        function generarUsuarioAleatorio() {
-            const prefijos = ["user", "emp", "colab", "staff"];
-            const randomPrefijo = prefijos[Math.floor(Math.random() * prefijos.length)];
-            const randomNum = Math.floor(Math.random() * 1000);
-            return `${randomPrefijo}${randomNum}`;
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('contrasena').value = data.contrasena;
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
+
+
+    <!--Script para eliminar-->
+    <script>
+        let deleteId = null; // Variable global para almacenar el ID del colaborador a eliminar
+
+        function openDeleteModal(id) {
+        deleteId = id;
+        document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteId = null;
+        }
+
+        // Evento para cancelar eliminación
+        document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+
+        // Evento para confirmar eliminación
+        document.getElementById('confirmDelete').addEventListener('click', function () {
+            if (deleteId) {
+                eliminarRegistro(deleteId);
+            }
+            closeDeleteModal();
+        });
+
+        // Función para eliminar el registro vía fetch
+        function eliminarRegistro(id_uem) {
+            fetch(`/eliminar_colaborador/${id_uem}`, { method: 'DELETE' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Recargar solo si la eliminación fue exitosa
+                    } else {
+                        alert('Error al eliminar: ' + (data.error || 'Desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión');
+                });
+        }
+
+        // Listener global para capturar clics en los botones de eliminar
+        document.addEventListener('click', function(e) {
+            const btnEliminar = e.target.closest('.btn-eliminar');
+            if (btnEliminar) {
+                const id_uem = btnEliminar.getAttribute('data-id');
+                openDeleteModal(id_uem); // Ahora solo abre el modal
+            }
+        });
+    </script>
+
 </body>
 </html>
 

@@ -41,34 +41,42 @@ password='024689'
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if 'usuario' in session:  
-        return redirect(url_for('dashboard_admin'))
+        return redirect(url_for('dashboard_admin' if session.get('es_admin') else 'dashboard_empleados'))
+    
     if request.method == 'POST':
         nombre = request.form['nombre']
         contrasena = request.form['contrasena']
+        
         try:
-            conexion = psycopg2.connect(
-                host=host,
-                database=database,
-                user=user,
-                password=password
-            )
+            conexion = psycopg2.connect(host=host, database=database, user=user, password=password)
             cursor = conexion.cursor()
-            query = "SELECT * FROM USUARIO WHERE nombre = %s AND contrasena = %s"
-            cursor.execute(query, (nombre, contrasena))
+
+            # Primero verificar si es admin
+            cursor.execute("SELECT * FROM USUARIO WHERE nombre = %s AND contrasena = %s", (nombre, contrasena))
             usuario = cursor.fetchone()
+            
             if usuario:
                 session['usuario'] = nombre
+                session['es_admin'] = True
                 return redirect(url_for('dashboard_admin'))
             else:
-                error = "Nombre de usuario o contraseña incorrectos"
-                return render_template('login.html', error=error)
+                # Si no es admin, verificar colaboradores
+                cursor.execute("SELECT * FROM colaboradores WHERE usuario = %s AND contrasena = %s", (nombre, contrasena))
+                empleado = cursor.fetchone()
+                
+                if empleado:
+                    session['usuario'] = nombre
+                    session['es_admin'] = False
+                    return redirect(url_for('dashboard_empleados'))
+                else:
+                    error = "Credenciales incorrectas"
+                    return render_template('login.html', error=error)
+
         except Exception as error:
-            return f"Error al conectar a la base de datos: {error}"
+            return f"Error: {error}"
         finally:
-            if 'cursor' in locals():
-                cursor.close()
-            if 'conexion' in locals():
-                conexion.close()
+            if 'cursor' in locals(): cursor.close()
+            if 'conexion' in locals(): conexion.close()
     response = make_response(render_template('login.html'))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -271,6 +279,7 @@ def generar():
 @app.route('/logout')
 def logout():
     session.pop('usuario', None)
+    session.pop('es_admin', None)
     return redirect(url_for('login'))
 
 # Gestión de empleados
@@ -476,6 +485,15 @@ def actualizar_colaborador(id_uem):
     except Exception as e:
         print("Error en actualizar_colaborador:", str(e))
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+#Página principal del usuario
+@app.route('/dashboard_empleados')
+def dashboard_empleados():
+    if 'usuario' in session and not session.get('es_admin'):
+        return render_template('Empleados/dashboard_empleados.html', nombre=session['usuario'])
+    return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

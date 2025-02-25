@@ -122,55 +122,54 @@
         gap: 10px;
         flex-wrap: wrap;
     }
-    
+
+    .decorations-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px;
+    }
+
     /* Ajustar la separación de la tabla */
     .content2 {
         padding: 0.5rem; /* Reducido aún más */
         z-index: 1;
-        margin-top: 20px; /* Reducir espacio con la tabla */
+        margin-top: -10px; /* Reducir espacio con la tabla */
     }
-    
-    .decorations {
-        position: absolute;
-        width: 100%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        z-index: 1; /* Mantener detrás del contenido */
-    }
-    
+
     .decorations img {
         width: 7rem;
-        z-index: 1;
     }
-    
+
     /* Decoraciones superiores (mantener pegadas al navbar) */
     .top-left { 
         position: absolute; /* Asegura que esté dentro del navbar */
         left: 5px; 
         top: 14.5rem;  
     }
-    
+
     .top-right { 
         position: absolute;
         right: 0px; 
         top: 14.5rem;   
         transform: scaleY(-1); 
     }
-    
+
     /* Decoraciones inferiores (fijas en la parte inferior de la pantalla) */
     .bottom-left, .bottom-right { 
-        position: fixed; /* Para que se mantengan fijas al desplazarse */
-        bottom: 0; 
+        width: 7rem; /* Ajusta el tamaño de los elementos decorativos */
+        position: relative; /* Mantener en el flujo normal */
     }
-    
+
     .bottom-left { 
-        left: 0; 
+        align-self: flex-start; /* Asegura que esté en la esquina izquierda */
+        margin-left: -10px; /* Ajusta según sea necesario */
         transform: rotate(180deg) scaleY(-1); 
     }
-    
-    .bottom-right { 
-        right: 0px; 
+
+    .bottom-right {
+        align-self: flex-end; /* Asegura que esté en la esquina derecha */
+        margin-right: -10px; /* Ajusta según sea necesario */
     }
     
 
@@ -532,11 +531,22 @@
         width: 100px;
     }
 
-    .btn-delete {
+    .btn-delete { 
         background-color: #831616;
         color: white;
+        display: flex;
+        justify-content: center; /* Centra el texto dentro del botón */
+        align-items: center; /* Centra el contenido verticalmente */
+        margin: 10px auto 0 auto; /* Centra el botón dentro del contenedor */
+        min-width: 150px;
+        max-width: 200px;
+        padding: 12px 20px;
+        border: none;
         border-radius: 50px;
-        width: 100px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        white-space: nowrap;
     }
 
     .btn-crear:hover {
@@ -564,27 +574,27 @@
     }
 
     /* Contenedor de botones alineados */
-.button-group {
-    display: flex; /* Activa Flexbox */
-    gap: 10px; /* Espacio entre los botones */
-    justify-content: center; /* Centra los botones horizontalmente */
-    align-items: center; /* Alinea los botones verticalmente */
-}
+    .button-group {
+        display: flex; /* Activa Flexbox */
+        gap: 10px; /* Espacio entre los botones */
+        justify-content: center; /* Centra los botones horizontalmente */
+        align-items: center; /* Alinea los botones verticalmente */
+    }
 
-/* Estilos uniformes para los botones */
-.button-group button,
-.button-group .btn-custom-2 { /* Para asegurar que otros tipos de botones también se alineen */
-    flex: 1; /* Hace que los botones ocupen el mismo espacio dentro del contenedor */
-    min-width: 150px; /* Define un ancho mínimo */
-    max-width: 200px; /* Define un ancho máximo si es necesario */
-    padding: 12px 20px; /* Espaciado interno */
-    border: none; /* Sin bordes */
-    border-radius: 50px; /* Bordes redondeados */
-    font-size: 16px; /* Tamaño de la fuente */
-    cursor: pointer; /* Cambia el cursor */
-    text-align: center; /* Asegura que el texto esté centrado */
-    white-space: nowrap; /* Evita que el texto se desborde en varias líneas */
-}
+    /* Estilos uniformes para los botones */
+    .button-group button,
+    .button-group .btn-custom-2 { /* Para asegurar que otros tipos de botones también se alineen */
+        flex: 1; /* Hace que los botones ocupen el mismo espacio dentro del contenedor */
+        min-width: 150px; /* Define un ancho mínimo */
+        max-width: 200px; /* Define un ancho máximo si es necesario */
+        padding: 12px 20px; /* Espaciado interno */
+        border: none; /* Sin bordes */
+        border-radius: 50px; /* Bordes redondeados */
+        font-size: 16px; /* Tamaño de la fuente */
+        cursor: pointer; /* Cambia el cursor */
+        text-align: center; /* Asegura que el texto esté centrado */
+        white-space: nowrap; /* Evita que el texto se desborde en varias líneas */
+    }
 
     h5{
         font-size: 18px;
@@ -665,7 +675,7 @@
     padding: 4px 0;
 }
 
-/* Contenedor del modal para el mapache*/
+/* Contenedor del modal para el mapache de cerrar sesión*/
 .modal3 {
     display: none;
     position: fixed;
@@ -761,3 +771,57 @@ p{
     border-radius: 50px;
     cursor: pointer;
 }
+
+/* Contenedor del modal para el mapache de eliminar reistro*/
+.modal4 {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto; /* Habilitar scroll si es necesario */
+}
+
+/* Ajusta el modal para que esté por encima */
+.modal-content4 {
+    background: white;
+    margin: 15% auto; /* Centrado vertical y horizontal */
+    padding: 25px;
+    border-radius: 40px;
+    text-align: center;
+    position: relative;
+    width: 380px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: revert-layer;
+
+    /* Borde solo en la parte derecha y en la parte baja */
+    border-right: 5px solid #014CB9;
+    border-bottom: 5px solid #014CB9;
+}
+
+.raccoon-image4 {
+    width: 240px;
+    position: absolute;
+    top: -207px;
+    left: 48%;
+    transform: translateX(-50%);
+    z-index: -1;
+}
+
+.warning-icon4 {
+    width: 55px;
+    height: 55px;
+    background-color: red;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    margin: 11px auto;
+}
+
+

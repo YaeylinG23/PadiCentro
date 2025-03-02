@@ -61,7 +61,7 @@
                     <i class="fa-solid fa-users"></i> <!-- Ícono de Font Awesome -->
                     Estatus de permisos y vacaciones
                 </button>
-                <!-- Modal -->
+                <!-- Modal para el estatus-->
                 <div class="modal2" id="modal">
                     <!-- Imágenes de mapaches dentro del modal-content2 -->
                     <img src="{{ url_for('static', filename='img/mapache_aceptado.png') }}" 
@@ -156,7 +156,7 @@
         
                     <!-- Botones -->
                     <div class="button-group">
-                        <button type="button" class="btn-modal btn-cerrar">Cerrar</button>
+                        <button type="button" class="btn-modal btn-cerrar" onclick="closeSolicitudModal()">Cerrar</button>                      
                         <button type="submit" class="btn-modal btn-guardar">Guardar</button>
                     </div>
                 </form>

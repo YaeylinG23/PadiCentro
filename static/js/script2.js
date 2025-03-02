@@ -104,6 +104,7 @@ function closeSolicitudModal() {
     document.getElementById('solicitudModal').style.display = 'none';
 }
 
+
 // Control del dropdown de tipos
 document.getElementById('tipoSolicitudBtn').addEventListener('click', function(e) {
     e.stopPropagation();

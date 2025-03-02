@@ -509,7 +509,7 @@ p{
 
 .modal-solicitud .modal-content3 {
     width: 480px; /* Aumentado 30px */
-    max-height: 75vh; /* Aumentado 5% */
+    max-height: 80vh; /* Aumentado 5% */
     padding: 25px; /* Más espacio interno */
     border: 6px solid #F9D007;
     border-radius: 30px;
@@ -543,34 +543,34 @@ p{
 
 /* ========== ENCABEZADO ========== */
 .modal-solicitud h2 {
-    font-size: 25px;
+    font-size: 20px;
     margin-bottom: 30px;
-    text-align: left;
+    text-align: center;
     font-weight: bold;
-    color: #333;
     position: relative;
-    padding-right: 30px;
 }
 
 /* ========== FORMULARIO ========== */
 .form-group label {
-    display: block;
-    margin: 15px 0 5px;
     font-weight: bold;
-    text-align: left;
-    color: #333;
+    margin-bottom: 5px;
 }
 
 /* Elementos de formulario */
 .form-input {
     width: 100%;
     padding: 12px;
-    border: 2px solid #666;
-    border-radius: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     color: #444;
     background: white;
     margin: 8px 0;
-    font-size: 14px;
+}
+
+/* Cambiar el color de fondo a amarillo cuando el input está enfocado */
+.form-input:focus {
+    border-color: #F9D007;
+    outline: none; /* Opcional: Elimina el borde predeterminado que algunos navegadores agregan al enfocar */
 }
 
 /* Grupo de radios horizontal */

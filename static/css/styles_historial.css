@@ -171,18 +171,25 @@ h4{
     flex-wrap: wrap;
     margin-top: 10px;
     padding: 0.5rem;
-    z-index: 1;
+    z-index: 3;
 }
 
-/* Menú desplegable */
+/* Contenedor del menú desplegable */
 .dropdown {
-    position: relative;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 0.5rem;
 }
+
+/* Botón del menú */
 .dropbtn {
     background-color: #ffffff;
     color: black;
-    padding: 10px 30px;
+    padding: 10px 15px;
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
@@ -190,27 +197,35 @@ h4{
     border: 4px solid #F9D007;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 300px;
 }
+
+/* Cambio de color al pasar el mouse */
 .dropbtn:hover {
-    background-color: #F9D007;
-    color: white;
+    background-color: #F9D007; /* Amarillo */
+    color: white; /* Texto en blanco */
     transform: translateY(-2px);
 }
+
 .dropbtn i {
-    margin-left: 0.5rem;
+    margin-left: 0.5rem; /* Icono a la derecha */
     font-size: 1.2rem;
 }
+
+/* Contenido del menú desplegable */
 .dropdown-content {
     display: none;
     position: absolute;
     background-color: white;
     min-width: 245px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
     border-radius: 30px;
     padding: 10px;
+    z-index: 2;
     border: 4px solid #F9D007;
 }
+
+/* Estilo para cada opción */
 .dropdown-content label {
     display: flex;
     align-items: center;
@@ -218,13 +233,20 @@ h4{
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.3s;
+    font-weight: normal;
 }
+
+/* Separación de los checkboxes */
 .dropdown-content label input {
     margin-right: 10px;
 }
+
+/* Hover sobre opciones */
 .dropdown-content label:hover {
     background-color: #f1f1f1;
 }
+
+/* Mostrar el menú */
 .show {
     display: block;
 }
@@ -251,10 +273,11 @@ h4{
     
 }
 
-.table-custom th {
+.table-custom thead {
     background-color: #D9D9D9;
     color: black;
-    font-size: 14px;   
+    font-size: 14px;
+    
 }
 
 .table-custom th,

@@ -1,5 +1,5 @@
 #Librerias y framework
-from flask import Flask, request, render_template, redirect, url_for, session, make_response, jsonify, send_file
+from flask import Flask, request, render_template, redirect, url_for, session, make_response, jsonify, send_file,flash
 import pandas as pd
 import psycopg2
 import random
@@ -13,6 +13,9 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 import os
+from datetime import datetime, timedelta, date, time
+import holidays
+from dateutil.relativedelta import relativedelta
 
 
 app = Flask(__name__)
@@ -20,12 +23,14 @@ app.secret_key = 'Contreseña'
 
 class CustomJSONProvider(DefaultJSONProvider):
     def default(self, obj):
-        if isinstance(obj, (datetime.datetime, datetime.date)):
+        if isinstance(obj, datetime):  
+            return obj.isoformat()  # Convierte datetime a string
+        if isinstance(obj, date):  
+            return obj.isoformat()  # Convierte date a string
+        if isinstance(obj, time):  # Agrega soporte para objetos time
             return obj.isoformat()
-        if isinstance(obj, datetime.time):
-            return obj.strftime('%H:%M:%S')
         return super().default(obj)
-
+    
 
 app.json_provider_class = CustomJSONProvider
 app.json = app.json_provider_class(app)
@@ -36,8 +41,7 @@ database='postgres2'
 user='postgres'
 password='024689'
 
-
-#Conexión con el login
+# Conexión con el login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if 'usuario' in session:  
@@ -51,22 +55,26 @@ def login():
             conexion = psycopg2.connect(host=host, database=database, user=user, password=password)
             cursor = conexion.cursor()
 
-            # Primero verificar si es admin
-            cursor.execute("SELECT * FROM USUARIO WHERE nombre = %s AND contrasena = %s", (nombre, contrasena))
+            # 1️⃣ Verificar si es admin
+            cursor.execute("SELECT id_usuario, nombre FROM USUARIO WHERE nombre = %s AND contrasena = %s", (nombre, contrasena))
             usuario = cursor.fetchone()
             
             if usuario:
                 session['usuario'] = nombre
+                session['id_uem'] = usuario[0]  # Guarda el ID del admin
                 session['es_admin'] = True
+                print(f"Usuario admin en sesión: ID={session['id_uem']}, Nombre={session['usuario']}")  # Debug
                 return redirect(url_for('dashboard_admin'))
             else:
-                # Si no es admin, verificar colaboradores
-                cursor.execute("SELECT * FROM colaboradores WHERE usuario = %s AND contrasena = %s", (nombre, contrasena))
+                # 2️⃣ Si no es admin, verificar colaboradores
+                cursor.execute("SELECT id_uem, usuario FROM colaboradores WHERE usuario = %s AND contrasena = %s", (nombre, contrasena))
                 empleado = cursor.fetchone()
                 
                 if empleado:
                     session['usuario'] = nombre
+                    session['id_uem'] = empleado[0]  # Guarda el ID del colaborador
                     session['es_admin'] = False
+                    print(f"Colaborador en sesión: ID={session['id_uem']}, Nombre={session['usuario']}")  # Debug
                     return redirect(url_for('dashboard_empleados'))
                 else:
                     error = "Credenciales incorrectas"
@@ -77,6 +85,7 @@ def login():
         finally:
             if 'cursor' in locals(): cursor.close()
             if 'conexion' in locals(): conexion.close()
+
     response = make_response(render_template('login.html'))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -269,9 +278,83 @@ def asistencias():
     return render_template('Admin/asistencias.html')
 
 # Ruta para historial de empleados (Admin)
-@app.route('/historial_empleados')
-def historial_empleados():
-    return render_template('Admin/historial_empleados.html')
+@app.route('/historial_empleados_admin')
+def historial_empleados_admin():
+    if not session.get('es_admin'):
+        return redirect(url_for('login'))
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Obtener lista de empleados para el dropdown
+        cur.execute("SELECT id_uem, nombre_completo FROM colaboradores ORDER BY nombre_completo")
+        empleados = cur.fetchall()
+
+        # Obtener filtros seleccionados
+        filter_ids = request.args.get('filter_ids', '')
+        # En la ruta /historial_empleados_admin
+        selected_ids = [int(id) for id in filter_ids.split(',') if id]  # Filtrar IDs vacíos  # Convertir a enteros
+
+        # Construir consulta base
+        query = """
+            SELECT 
+                to_char(s.fecha_inicio, 'TMMonth YYYY') AS mes_anio,
+                s.fecha_inicio,
+                s.fecha_fin,
+                ((s.fecha_fin - s.fecha_inicio) + 1) AS dias_totales,
+                s.tipo,
+                s.estado,
+                CASE 
+                    WHEN s.tipo = 'VACACIONES' THEN '---'
+                    WHEN s.tipo = 'PERMISO' THEN p.comentario
+                    WHEN s.tipo = 'INCAPACIDAD' THEN i.comentario
+                    ELSE '---'
+                END AS descripcion,
+                c.nombre_completo AS nombre_usuario
+            FROM solicitudes s
+            JOIN colaboradores c ON s.id_uem = c.id_uem
+            LEFT JOIN permisos p ON s.id = p.solicitud_id
+            LEFT JOIN incapacidades i ON s.id = i.solicitud_id
+        """
+
+        # Añadir condición de filtro si hay IDs seleccionados
+        params = []
+        if selected_ids:
+            query += " WHERE c.id_uem = ANY(%s)"
+            params.append(selected_ids)
+
+        query += " ORDER BY s.fecha_inicio DESC"
+
+        cur.execute(query, params if selected_ids else None)
+        solicitudes = cur.fetchall()
+
+        solicitudes_list = []
+        for row in solicitudes:
+            solicitudes_list.append({
+                "mes_anio": row[0],
+                "fecha_inicio": row[1].strftime("%d/%m/%Y") if row[1] else "",
+                "fecha_fin": row[2].strftime("%d/%m/%Y") if row[2] else "",
+                "dias_totales": row[3],
+                "tipo": row[4],
+                "estado": row[5],
+                "descripcion": row[6],
+                "nombre_usuario": row[7]
+            })
+
+        return render_template("Admin/historial_empleados_admin.html", 
+                            solicitudes=solicitudes_list,
+                            empleados=empleados,
+                            selected_ids=selected_ids)
+
+    except Exception as e:
+        print(f"Error en historial_empleados_admin: {str(e)}")
+        return f"Error: {str(e)}"
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
 #Botón para generar credenciales (Admin) 
 def generar_contrasena(longitud=12):
@@ -396,12 +479,12 @@ def obtener_colaborador(id_uem):
                 colaborador_data = {
                     'id_uem': colaborador[0],
                     'nombre_completo': colaborador[1],
-                    'fecha_nacimiento': colaborador[2],
+                    'fecha_nacimiento': colaborador[2].isoformat() if colaborador[2] else None,
                     'direccion': colaborador[3],
                     'telefono': colaborador[4],
                     'email': colaborador[5],
                     'departamento': colaborador[6],
-                    'fecha_contratacion': colaborador[7],
+                    'fecha_contratacion': colaborador[7].isoformat() if colaborador[7] else None,
                     'usuario': colaborador[8],
                     'contrasena': colaborador[9]
                 }
@@ -425,7 +508,6 @@ def obtener_colaborador(id_uem):
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 # Ruta para actualizar colaborador (Admin) 
 @app.route('/actualizar_colaborador/<int:id_uem>', methods=['PUT'])
@@ -484,7 +566,6 @@ def actualizar_colaborador(id_uem):
         print("Error en actualizar_colaborador:", str(e))
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 #Página principal del usuario
 @app.route('/dashboard_empleados')
 def dashboard_empleados():
@@ -492,14 +573,214 @@ def dashboard_empleados():
         return render_template('Empleados/dashboard_empleados.html', nombre=session['usuario'])
     return redirect(url_for('login'))
 
-#Estatus para el usuario
-@app.route('/estatus')
-def estatus():
-    return render_template('Empleados/estatus.html')
-
 # Historial para el usuario
-@app.route('/historial_usuarios')
-def historial_usuarios():
-    return render_template('Empleados/historial_usuarios.html')
+def get_db_connection():
+    conn = psycopg2.connect(
+        host='localhost',
+        database='postgres2',
+        user='postgres',
+        password='024689'
+    )
+    return conn
+
+from datetime import datetime
+
+@app.route('/pedirvacaciones', methods=['GET'])
+def pedirvacaciones():
+    id_uem = session.get('id_uem')
+    if not id_uem:
+        return jsonify({'error': 'No autenticado'}), 401
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT fecha_contratacion FROM colaboradores WHERE id_uem = %s", (id_uem,))
+        resultado = cur.fetchone()
+        if not resultado:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+        fecha_contratacion = resultado[0]
+
+        delta = relativedelta(datetime.now().date(), fecha_contratacion)
+        años_completos = delta.years
+        if años_completos < 1:
+            return jsonify({'dias_disponibles': 0, 'mensaje': '❌ No tienes días de vacaciones en tu primer año.'})
+
+        dias_vacaciones = 12 + 2 * (años_completos - 1)
+        cur.execute("""
+            SELECT SUM((fecha_fin - fecha_inicio) :: INTEGER) + COUNT(*)
+            FROM solicitudes
+            WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADA'
+        """, (id_uem,))
+        dias_usados = cur.fetchone()[0] or 0
+        dias_restantes = max(dias_vacaciones - dias_usados, 0)
+        return jsonify({'dias_disponibles': dias_restantes})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+@app.route('/solicitar_permiso', methods=['POST'])
+def solicitar_permiso():
+    id_uem = session.get('id_uem')
+    if not id_uem:
+        flash('Debes iniciar sesión para realizar esta acción.')
+        return redirect(url_for('login'))
+
+    tipo = request.form.get('tipo')
+    fecha_inicio = request.form.get('fechaInicio')
+    fecha_fin = request.form.get('fechaFin')
+    comentario = request.form.get('comentario', '').strip()
+    archivo = request.files.get('archivo')
+
+    try:
+        fecha_inicio_dt = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+        fecha_fin_dt = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+    except ValueError:
+        flash('Formato de fecha inválido.')
+        return redirect(url_for('dashboard_empleados'))
+
+    if fecha_fin_dt < fecha_inicio_dt:
+        flash('La fecha de fin no puede ser anterior a la de inicio.')
+        return redirect(url_for('dashboard_empleados'))
+
+    if tipo in ['PERMISO', 'INCAPACIDAD']:
+        if not comentario:
+            flash('Debes escribir un comentario.')
+            return redirect(url_for('dashboard_empleados'))
+        if not archivo or archivo.filename == '':
+            flash('Debes subir un justificante.')
+            return redirect(url_for('dashboard_empleados'))
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if tipo == 'VACACIONES':
+            cur.execute("SELECT fecha_contratacion FROM colaboradores WHERE id_uem = %s", (id_uem,))
+            resultado = cur.fetchone()
+            if not resultado:
+                flash('No se encontró la fecha de contratación del usuario.')
+                return redirect(url_for('dashboard_empleados'))
+            fecha_contratacion = resultado[0]
+
+            delta = relativedelta(datetime.now().date(), fecha_contratacion)
+            años_completos = delta.years
+            if años_completos < 1:
+                flash('❌ No tienes días de vacaciones en tu primer año.')
+                return redirect(url_for('dashboard_empleados'))
+
+            dias_vacaciones = 12 + 2 * (años_completos - 1)
+            cur.execute("""
+                SELECT SUM((fecha_fin - fecha_inicio) :: INTEGER) + COUNT(*)
+                FROM solicitudes
+                WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADA'
+            """, (id_uem,))
+            dias_usados = cur.fetchone()[0] or 0
+            dias_restantes = max(dias_vacaciones - dias_usados, 0)
+
+            rango_fechas = [fecha_inicio_dt + timedelta(days=i) for i in range((fecha_fin_dt - fecha_inicio_dt).days + 1)]
+            years = list({fecha.year for fecha in rango_fechas})
+            mx_holidays = holidays.Mexico(years=years)
+            dias_solicitados = sum(1 for fecha in rango_fechas if fecha.weekday() < 5 and fecha not in mx_holidays)
+
+            if dias_solicitados > dias_restantes:
+                flash(f'⚠ Días disponibles: {dias_restantes} | Solicitaste: {dias_solicitados}')
+                return redirect(url_for('dashboard_empleados'))
+
+        cur.execute("""
+            INSERT INTO solicitudes (id_uem, tipo, fecha_inicio, fecha_fin)
+            VALUES (%s, %s, %s, %s) RETURNING id
+        """, (id_uem, tipo, fecha_inicio, fecha_fin))
+        solicitud_id = cur.fetchone()[0]
+
+        if tipo == 'PERMISO':
+            cur.execute("""
+                INSERT INTO permisos (solicitud_id, justificante, comentario)
+                VALUES (%s, %s, %s)
+            """, (solicitud_id, archivo.read(), comentario))
+        elif tipo == 'VACACIONES':
+            cur.execute("INSERT INTO vacaciones (solicitud_id) VALUES (%s)", (solicitud_id,))
+        elif tipo == 'INCAPACIDAD':
+            cur.execute("""
+                INSERT INTO incapacidades (solicitud_id, comentario, justificante)
+                VALUES (%s, %s, %s)
+            """, (solicitud_id, comentario, archivo.read()))
+
+        conn.commit()
+        flash('✅ Solicitud enviada correctamente.')
+        return redirect(url_for('dashboard_empleados'))
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash(f'❌ Error: {str(e)}')
+        return redirect(url_for('dashboard_empleados'))
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+@app.route('/historial_empleados')
+def historial_empleados():
+    id_uem = session.get('id_uem')
+    if not id_uem:
+        return redirect(url_for('login'))
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT 
+                to_char(s.fecha_inicio, 'TMMonth YYYY') AS mes_anio,
+                s.fecha_inicio,
+                s.fecha_fin,
+                ((s.fecha_fin - s.fecha_inicio) + 1) AS dias_totales,
+                s.tipo,
+                s.estado,
+                CASE 
+                    WHEN s.tipo = 'VACACIONES' THEN '---'
+                    WHEN s.tipo = 'PERMISO' THEN p.comentario
+                    WHEN s.tipo = 'INCAPACIDAD' THEN i.comentario
+                    ELSE '---'
+                END AS descripcion,
+                c.nombre_completo AS nombre_usuario
+            FROM solicitudes s
+            LEFT JOIN colaboradores c ON s.id_uem = c.id_uem
+            LEFT JOIN permisos p ON s.id = p.solicitud_id
+            LEFT JOIN incapacidades i ON s.id = i.solicitud_id
+            WHERE s.id_uem = %s
+            ORDER BY s.fecha_inicio DESC
+        """, (id_uem,))
+        solicitudes = cur.fetchall()
+        solicitudes_list = []
+        for row in solicitudes:
+            solicitudes_list.append({
+                "mes_anio": row[0],
+                "fecha_inicio": row[1].strftime("%d/%m/%Y") if row[1] else "",
+                "fecha_fin": row[2].strftime("%d/%m/%Y") if row[2] else "",
+                "dias_totales": row[3],
+                "tipo": row[4].strip().upper(),
+                "estado": row[5],
+                "descripcion": row[6],
+                "nombre_usuario": row[7]
+            })
+        return render_template("Empleados/historial_empleados.html", solicitudes=solicitudes_list)
+    except Exception as e:
+        return f"Error: {str(e)}"
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+
 if __name__ == '__main__':
     app.run(debug=True)

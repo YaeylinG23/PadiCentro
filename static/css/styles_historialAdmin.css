@@ -115,18 +115,6 @@ h4{
     box-shadow: 0 2px 5px rgba(255, 75, 92, 0.2);
 }
 
-/* Ajustar el espaciado general del contenedor */
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Asegura que ocupe toda la pantalla */
-}
-
-.content {
-    flex: 1; /* Permite que el contenido crezca y empuje las decoraciones abajo */
-    padding: 20px;
-}
-
 .decorations-container {
     display: flex;
     justify-content: space-between;
@@ -175,46 +163,7 @@ h4{
     margin-right: -10px; /* Ajusta según sea necesario */
 }
 
-
-/* Estilos para los botones */
-.button-container {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.button-container > a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: .5rem 1.2rem;
-    border-radius: 50px;
-    text-decoration: none;
-    color: black;
-    font-size: 1.1rem;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    border: 4px solid; /* Borde más grueso */
-}
-
-.button-container > a i {
-    margin-left: 0.5rem; /* Icono a la derecha */
-    font-size: 1.2rem;
-}
-
-.btn-custom-1 {
-    background-color: rgb(255, 255, 255);
-    border-color: #4DAD33 !important; /* Borde verde */
-}
-
-.btn-custom-1:hover {
-    background-color: #4DAD33; /* Fondo verde al hacer hover */
-    color: white; /* Texto blanco al hacer hover */
-    transform: translateY(-2px);
-}
-
-.button-container {
+.content-button{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -278,52 +227,6 @@ h4{
 }
 .show {
     display: block;
-}
-
-/*Botón de permisos*/
-.dropbtn3 {
-    background-color: #ffffff;
-    color: black;
-    padding: 10px 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 50px;
-    border: 4px solid #014CB9;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-.dropbtn3:hover {
-    background-color: #014CB9;
-    color: white;
-    transform: translateY(-2px);
-}
-.dropbtn3 i {
-    margin-left: 0.5rem;
-    font-size: 1.2rem;
-}
-
-/*Botón de vacaciones*/
-.dropbtn4 {
-    background-color: #ffffff;
-    color: black;
-    padding: 10px 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 50px;
-    border: 4px solid #4DAD33;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-.dropbtn4:hover {
-    background-color: #4DAD33;
-    color: white;
-    transform: translateY(-2px);
-}
-.dropbtn4 i {
-    margin-left: 0.5rem;
-    font-size: 1.2rem;
 }
 
 
@@ -426,124 +329,7 @@ h5{
 }
 
 
-/* Contenedor de checkboxes */
-.checkbox-container {
-display: flex;
-gap: 15px; /* Espacio entre elementos */
-flex-wrap: wrap; /* Permite que se ajusten en pantallas pequeñas */
-}
-
-.checkbox-container > div {
-display: flex;
-align-items: center;
-gap: 5px;
-}
-
-/* Separador entre horarios */
-.separador-horario {
-margin: 4px 0;
-border: 0;
-border-top: 1px solid #ddd;
-}
-
-.horario-item {
-padding: 4px 0;
-}
-
-/* Estilos para la tabla interna con scroll horizontal */
-.scrollable-table {
-    max-width: 200px; /* Ancho máximo antes de que aparezca el scroll */
-    overflow-x: auto; /* Habilitar scroll horizontal */
-    white-space: nowrap; /* Evitar que el contenido se divida en varias líneas */
-    display: block;
-}
-
-.scrollable-table table {
-    width: auto; /* Ancho automático para que la tabla se expanda según su contenido */
-    border-collapse: collapse;
-}
-
-.scrollable-table th, .scrollable-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-
-
-/* Estilos del botón */
-.btn-ver-detalles {
-    background-color: #014CB9;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    cursor: pointer;
-    border-radius: 20px;
-}
-
-/* Estilos del modal */
-.modal2 {
-    display: none;
-    position: fixed; /* Se mantiene siempre en la pantalla */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-/* Contenedor del modal */
-.modal-content2 {
-    background-color: white;
-    margin: 10% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 900px;
-    border-radius: 30px;
-    position: relative;
-    z-index: 10001;
-    border: 6px solid #F9D007;
-}
-
-
-/* Botón para cerrar */
-.close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-/* Contenedor con scroll horizontal */
-.scrollable-table {
-    overflow-x: auto;
-    max-width: 100%;
-    border: 1px solid #ccc;
-    padding: 15px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
-}
-
-th {
-    background-color: #f4f4f4;
-}
-
-h3{
-    font-size: 20px;
-    font-weight: bold;
-}
-
-/* Contenedor del modal para el mapache*/
+/* Contenedor del modal para el mapache cerrar sesión*/
 .modal {
     display: none;
     position: fixed;

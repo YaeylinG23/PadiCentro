@@ -116,11 +116,14 @@
     }
 
     /* Ajustar el espaciado general del contenedor */
-    .content {
+    .content1 {
         display: flex;
-        z-index: 2;
-        gap: 10px;
-        flex-wrap: wrap;
+        align-self: center;
+    }
+
+    .content2{
+        margin-top: 20px;
+
     }
 
     .decorations-container {
@@ -130,12 +133,6 @@
         padding: 10px;
     }
 
-    /* Ajustar la separación de la tabla */
-    .content2 {
-        padding: 0.5rem; /* Reducido aún más */
-        z-index: 1;
-        margin-top: -10px; /* Reducir espacio con la tabla */
-    }
 
     .decorations img {
         width: 7rem;
@@ -176,39 +173,35 @@
     /* Estilos para los botones */
     .button-container {
         display: flex;
-        gap: 15px; /* Espaciado entre los botones */
-        margin-top: 20px;
-    }
-
-    .button-container > a {
-        display: flex;
-        align-items: center;
         justify-content: center;
-        padding: .5rem 1.2rem;
-        border-radius: 50px;
-        text-decoration: none;
-        color: black;
-        font-size: 1.1rem;
-        font-weight: bold;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        border: 4px solid;
-    }
-
-    .button-container > a i {
-        margin-left: 0.5rem; /* Icono a la derecha */
-        font-size: 1.2rem;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        padding: 0.5rem;
+        z-index: 1;
     }
 
     .btn-custom-1 {
-        background-color: rgb(255, 255, 255);
-        border-color: #4DAD33 !important; /* Borde verde */
+        background-color: #ffffff;
+        border: 4px solid #4DAD33;
+        border-radius: 50px;
+        color: black;
+        font-size: 1.1rem;
+        font-weight: bold;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        width: 300px;
     }
 
     .btn-custom-1:hover {
         background-color: #4DAD33; /* Fondo verde al hacer hover */
         color: white; /* Texto blanco al hacer hover */
         transform: translateY(-2px);
+    }
+
+    .btn-custom-1 i{
+        margin-left: 0.5rem;
     }
 
     /* Contenedor de la tabla */
@@ -285,10 +278,13 @@
     /* Contenedor del menú desplegable */
     .dropdown {
         display: flex;
-        justify-content: center; /* Centra los botones horizontalmente */
-        align-items: center; /* Asegura que estén alineados verticalmente */
-        gap: 15px; /* Espaciado entre los botones */
-        margin-top: 20px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        padding: 0.5rem;
+        z-index: 1;
     }
 
     /* Botón del menú */
@@ -803,9 +799,9 @@ p{
 }
 
 .raccoon-image4 {
-    width: 240px;
+    width: 230px;
     position: absolute;
-    top: -207px;
+    top: -212px;
     left: 48%;
     transform: translateX(-50%);
     z-index: -1;

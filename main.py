@@ -83,6 +83,13 @@ def login():
     response.headers['Expires'] = '0'
     return response
 
+#Cerrar sesión
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    session.pop('es_admin', None)
+    return redirect(url_for('login'))
+
 #Página principal del administrador
 @app.route('/dashboard_admin')
 def dashboard_admin():
@@ -95,18 +102,19 @@ def dashboard_admin():
     else:
         return redirect(url_for('login'))
 
-# Función para enviar el correo
+# Función para enviar el correo (Admin)
 EMAIL_EMISOR = 'garciayaytube@gmail.com'
 EMAIL_CONTRA  = 'tczj qcuu npyd ijwe'
 
 def send_email(user, password, receptor):
-    asunto = "Tus credenciales de acceso"
+    asunto = "Credenciales de acceso"
     cuerpo = f"""
     Tu usuario es: {user}
     Tu contraseña es: {password}
 
-    Saludos,
-    Equipo de Recursos Humanos.
+    
+    "Por seguridad, esta contraseña es temporal. Cámbiala al acceder a tu cuenta para mantener la confidencialidad de tu información."
+    Saludos.
     """
 
     em = EmailMessage()
@@ -126,7 +134,7 @@ def send_email(user, password, receptor):
         print(f"Error al enviar el correo: {e}")
         return False
 
-# Añadir empleados
+# Añadir empleados (Admin) 
 @app.route('/añadir_empleados', methods=['GET', 'POST'])
 def añadir_empleados():
     if 'usuario' not in session:
@@ -255,7 +263,7 @@ def añadir_empleados():
         print(f"Error: {str(e)}")
         return render_template('Admin/añadir_empleados.html', error=str(e))
 
-#Sistema de asistencias para Admin
+#Sistema de asistencias (Admin) 
 @app.route('/asistencias')
 def asistencias():
     return render_template('Admin/asistencias.html')
@@ -265,7 +273,7 @@ def asistencias():
 def historial_empleados():
     return render_template('Admin/historial_empleados.html')
 
-#Botón para generar credenciales
+#Botón para generar credenciales (Admin) 
 def generar_contrasena(longitud=12):
     caracteres = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(caracteres) for _ in range(longitud))
@@ -275,14 +283,7 @@ def generar():
     contrasena = generar_contrasena()
     return jsonify({'contrasena': contrasena})
 
-#Cerrar sesión
-@app.route('/logout')
-def logout():
-    session.pop('usuario', None)
-    session.pop('es_admin', None)
-    return redirect(url_for('login'))
-
-# Gestión de empleados
+# Gestión de empleados (Admin) 
 @app.route('/gestion_empleados')
 def gestion_empleados():
     if 'usuario' in session:
@@ -333,7 +334,7 @@ def gestion_empleados():
     else:
         return redirect(url_for('login'))
 
-# Ruta para eliminar colaborador
+# Ruta para eliminar colaborador (Admin) 
 @app.route('/eliminar_colaborador/<int:id_uem>', methods=['DELETE'])
 def eliminar_colaborador(id_uem):
     try:
@@ -371,7 +372,7 @@ def eliminar_colaborador(id_uem):
             'message': 'Error de conexión a la base de datos'
         }), 500
 
-# Ruta para obtener datos de un colaborador (ahora con fechas formateadas)
+# Ruta para obtener datos de un colaborador (ahora con fechas formateadas) (Admin) 
 @app.route('/obtener_colaborador/<int:id_uem>')
 def obtener_colaborador(id_uem):
     try:
@@ -426,10 +427,7 @@ def obtener_colaborador(id_uem):
         return jsonify({'error': str(e)}), 500
 
 
-
-
-
-# Ruta para actualizar colaborador
+# Ruta para actualizar colaborador (Admin) 
 @app.route('/actualizar_colaborador/<int:id_uem>', methods=['PUT'])
 def actualizar_colaborador(id_uem):
     try:
@@ -494,6 +492,14 @@ def dashboard_empleados():
         return render_template('Empleados/dashboard_empleados.html', nombre=session['usuario'])
     return redirect(url_for('login'))
 
+#Estatus para el usuario
+@app.route('/estatus')
+def estatus():
+    return render_template('Empleados/estatus.html')
 
+# Historial para el usuario
+@app.route('/historial_usuarios')
+def historial_usuarios():
+    return render_template('Empleados/historial_usuarios.html')
 if __name__ == '__main__':
     app.run(debug=True)

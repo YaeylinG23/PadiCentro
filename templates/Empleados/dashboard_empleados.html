@@ -26,7 +26,7 @@
             <!-- Modal de confirmación -->
             <div id="logoutModal" class="modal">
                 <div class="modal-content">
-                    <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image">
+                    <img src="{{ url_for('static', filename='img/mapache_aceptado.png') }}" alt="Mapache" class="raccoon-image">
                     <div class="warning-icon">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>                    
@@ -52,18 +52,57 @@
         <div class="content">
             <!-- Botones con hexágono e ícono -->
             <div class="button-container">
-                <a href="" class="btn-custom-1">
+                <button class="btn-custom-1">
                     <i class="fa-solid fa-list-check"></i> <!-- Ícono de Font Awesome -->
                     Solicitud de permisos y vacaciones
-                </a>
-                <a href="" class="btn-custom-3">
+                </button>
+                <button class="btn-custom-3" id="openModal">
                     <i class="fa-solid fa-users"></i> <!-- Ícono de Font Awesome -->
                     Estatus de permisos y vacaciones
-                </a>
-                <a href="" class="btn-custom-2">
+                </button>
+            
+                <!-- Modal -->
+                <div class="modal2" id="modal">
+                    <!-- Imágenes de mapaches dentro del modal-content2 -->
+                    <img src="{{ url_for('static', filename='img/mapache_aceptado.png') }}" 
+                    alt="Mapache 1" class="mapache-image slide1 active">
+                    <img src="{{ url_for('static', filename='img/mapache_rechazado.png') }}" 
+                    alt="Mapache 2" class="mapache-image slide2">
+            
+                    <div class="prev" id="prev">&#10094;</div>
+            
+                    <div class="modal-content2">
+                        <span class="close2" id="closeModal">&times;</span>
+            
+                        <div class="carousel">
+                            <!-- Slide 1 -->
+                            <div class="carousel-slide active">
+                                <div class="icon2">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>                    
+                                <h3>Incapacidad</h3>
+                                <p class="status-text">En Proceso</p>
+                                <small>2025-02-25</small>
+                            </div>
+            
+                            <!-- Slide 2 -->
+                            <div class="carousel-slide">
+                                <div class="icon2">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>                    
+                                <h3>Permiso</h3>
+                                <p class="status-text">Rechazado</p>
+                                <small>2025-02-20</small>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="next" id="next">&#10095;</div>
+                </div>
+                <button class="btn-custom-2" onclick="location.href='{{ url_for('historial_usuarios') }}'">
                     <i class="fa-solid fa-calendar-days"></i> <!-- Ícono de Font Awesome -->
                     Historial de permisos y vacaciones
-                </a>
+                </button>
             </div>
         </div>
 
@@ -89,6 +128,58 @@
                 window.location.reload();  // Recargar la página si el usuario regresa con el botón "Atrás"
             }
         };
+    </script>
+
+    <!--Script para el carrusel-->
+    <script>
+        // Modal
+        const modal = document.getElementById("modal");
+        const openModal = document.getElementById("openModal");
+        const closeModal = document.getElementById("closeModal");
+
+        openModal.addEventListener("click", () => modal.style.display = "flex");
+        closeModal.addEventListener("click", () => modal.style.display = "none");
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) modal.style.display = "none";
+        });
+
+        // Carrusel
+        const slides = document.querySelectorAll(".carousel-slide");
+        const images = document.querySelectorAll(".mapache-image");
+        let index = 0;
+
+        function showSlide(i) {
+            slides.forEach((slide, idx) => {
+                slide.classList.remove("active");
+                images[idx].classList.remove("active"); // Oculta todas las imágenes
+            });
+            
+            slides[i].classList.add("active");
+            images[i].classList.add("active"); // Muestra la imagen correcta
+        }
+
+        document.getElementById("prev").addEventListener("click", () => {
+            index = (index === 0) ? slides.length - 1 : index - 1;
+            showSlide(index);
+        });
+
+        document.getElementById("next").addEventListener("click", () => {
+            index = (index === slides.length - 1) ? 0 : index + 1;
+            showSlide(index);
+        });
+
+        // Mostrar la imagen inicial
+        showSlide(index);
+
+        // Funciones de los botones
+        function closeLogoutModal() {
+            modal.style.display = "none";
+        }
+
+        function logout() {
+            alert("Sesión cerrada");
+            modal.style.display = "none";
+        }
     </script>
 </body>
 </html>

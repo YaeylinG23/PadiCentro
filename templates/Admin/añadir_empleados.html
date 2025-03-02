@@ -28,7 +28,7 @@
             <!-- Modal de confirmación -->
             <div id="logoutModal" class="modal3">
                 <div class="modal-content3">
-                    <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image">
+                    <img src="{{ url_for('static', filename='img/mapache_aceptado.png') }}" alt="Mapache" class="raccoon-image">
                     <div class="warning-icon">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>                    
@@ -52,7 +52,7 @@
         <br>
 
         <!-- Contenido del dashboard -->
-        <div class="content">
+        <div class="content1">
             <div class="dropdown">
                 <!-- Botón con icono -->
                 <button onclick="toggleDropdown()" class="dropbtn">
@@ -70,16 +70,16 @@
 
             <div class="button-container">
                 <!-- Botón para abrir el modal -->
-                <a href="#" class="btn-custom-1" id="openModalBtn">
+                <button class="btn-custom-1" id="openModalBtn">
                     Agregar usuario<i class="fas fa-user-plus"></i>
-                </a>                
+                </button>                
 
                 <!-- El modal -->
                 <div id="myModal" class="modal">
                     <div class="modal-content">
                         <span class="close">&times;</span>
                         <h2>Registrar empleado</h2>
-                         <!-- Formulario dentro del modal -->
+                        <!-- Formulario dentro del modal -->
                             <form id="empleadoForm" action="/añadir_empleados" method="POST">
                                 <input type="hidden" name="id_uem" id="id_uem"> <!-- Campo oculto --> 
                                 <div class="form-group">
@@ -196,110 +196,108 @@
                 </div>
             </div>
         </div>
-
-        <div class="content2">
-            <!-- Contenedor de la tabla -->
-            <div class="table-wrapper">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Nombre completo</th>
-                            <th>Usuario</th>
-                            <th>Contraseña</th>
-                            <th>E-mail</th>
-                            <th>Departamento</th>
-                            <th>Fecha de contratación</th>
-                            <th>Dirección</th>
-                            <th>No. Teléfono</th>
-                            <th>Fecha de nacimiento</th>
-                            <th>Horario de entrada</th>
-                            <th>Horario de salida</th>
-                            <th>Días de trabajo</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                            <!-- Modifica el tbody de la tabla -->
-                    <tbody>
-                        {% for colaborador in colaboradores %}
-                        <tr data-id="{{ colaborador[0] }}">
-                            <td>{{ colaborador[1] }}</td> <!-- nombre_completo -->
-                            <td>{{ colaborador[8] }}</td> <!-- usuario -->
-                            <td>{{ colaborador[9] }}</td> <!-- contrasena -->
-                            <td>{{ colaborador[5] }}</td> <!-- email -->
-                            <td>{{ colaborador[6] }}</td> <!-- departamento -->
-                            <td>{{ colaborador[7].strftime('%d/%m/%Y') if colaborador[7] }}</td> <!-- fecha_contratacion -->
-                            <td>{{ colaborador[3] }}</td> <!-- direccion -->
-                            <td>{{ colaborador[4] }}</td> <!-- telefono -->
-                            <td>{{ colaborador[2].strftime('%d/%m/%Y') if colaborador[2] }}</td> <!-- fecha_nacimiento -->
-                            <!-- Horario de entrada -->
-                            <td>
-                                {% if colaborador[10] %}
-                                <div class="horario-item">
-                                {% for entrada in colaborador[10] %}
-                                    {{ entrada }}
-                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
-                                {% endfor %}
-                                </div>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                            
-                            <!-- Horario de salida -->
-                            <td>
-                                {% if colaborador[11] %}
-                                <div class="horario-item">
-                                {% for salida in colaborador[11] %}
-                                    {{ salida }}
-                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
-                                {% endfor %}
-                                </div>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                            
-                            <!-- Días de trabajo -->
-                            <td>
-                                {% if colaborador[12] %}
-                                <div class="horario-item">
-                                {% for dias in colaborador[12] %}
-                                    {{ dias|join(', ') }}
-                                    {% if not loop.last %}<hr class="separador-horario">{% endif %}
-                                {% endfor %}
-                                </div>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                            <td>
-                                <i class="fas fa-edit btn-editar" data-id="{{ colaborador[0] }}"></i>
-                                <i class="fas fa-trash btn-eliminar" data-id="{{ colaborador[0] }}"></i>
-                                <!-- Modal de confirmación para eliminar -->
-                                <div id="deleteModal" class="modal4" >
-                                    <div class="modal-content4">
-                                        <img src="{{ url_for('static', filename='img/mapache_cerrar.png') }}" alt="Mapache" class="raccoon-image4">
-                                        <div class="warning-icon4">
-                                            <i class="fa-solid fa-triangle-exclamation"></i>
-                                        </div>                    
-                                        <p>¿Estás seguro de que deseas eliminar este registro?</p>
-                                        <div class="buttons">
-                                            <button class="cancel-button" id="cancelDelete">Cancelar</button>
-                                            <button class="confirm-button" id="confirmDelete">Eliminar</button>
-                                        </div>
+    </div>
+    <div class="content2">
+        <div class="table-wrapper">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Usuario</th>
+                        <th>Contraseña</th>
+                        <th>E-mail</th>
+                        <th>Departamento</th>
+                        <th>Fecha de contratación</th>
+                        <th>Dirección</th>
+                        <th>No. Teléfono</th>
+                        <th>Fecha de nacimiento</th>
+                        <th>Horario de entrada</th>
+                        <th>Horario de salida</th>
+                        <th>Días de trabajo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                        <!-- Modifica el tbody de la tabla -->
+                <tbody>
+                    {% for colaborador in colaboradores %}
+                    <tr data-id="{{ colaborador[0] }}">
+                        <td>{{ colaborador[1] }}</td> <!-- nombre_completo -->
+                        <td>{{ colaborador[8] }}</td> <!-- usuario -->
+                        <td>{{ colaborador[9] }}</td> <!-- contrasena -->
+                        <td>{{ colaborador[5] }}</td> <!-- email -->
+                        <td>{{ colaborador[6] }}</td> <!-- departamento -->
+                        <td>{{ colaborador[7].strftime('%d/%m/%Y') if colaborador[7] }}</td> <!-- fecha_contratacion -->
+                        <td>{{ colaborador[3] }}</td> <!-- direccion -->
+                        <td>{{ colaborador[4] }}</td> <!-- telefono -->
+                        <td>{{ colaborador[2].strftime('%d/%m/%Y') if colaborador[2] }}</td> <!-- fecha_nacimiento -->
+                        <!-- Horario de entrada -->
+                        <td>
+                            {% if colaborador[10] %}
+                            <div class="horario-item">
+                            {% for entrada in colaborador[10] %}
+                                {{ entrada }}
+                                {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                            {% endfor %}
+                            </div>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Horario de salida -->
+                        <td>
+                            {% if colaborador[11] %}
+                            <div class="horario-item">
+                            {% for salida in colaborador[11] %}
+                                {{ salida }}
+                                {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                            {% endfor %}
+                            </div>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Días de trabajo -->
+                        <td>
+                            {% if colaborador[12] %}
+                            <div class="horario-item">
+                            {% for dias in colaborador[12] %}
+                                {{ dias|join(', ') }}
+                                {% if not loop.last %}<hr class="separador-horario">{% endif %}
+                            {% endfor %}
+                            </div>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            <i class="fas fa-edit btn-editar" data-id="{{ colaborador[0] }}"></i>
+                            <i class="fas fa-trash btn-eliminar" data-id="{{ colaborador[0] }}"></i>
+                            <!-- Modal de confirmación para eliminar -->
+                            <div id="deleteModal" class="modal4" >
+                                <div class="modal-content4">
+                                    <img src="{{ url_for('static', filename='img/mapache_rechazado.png') }}" alt="Mapache" class="raccoon-image4">
+                                    <div class="warning-icon4">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                    </div>                    
+                                    <p>¿Estás seguro de que deseas eliminar este registro?</p>
+                                    <div class="buttons">
+                                        <button class="cancel-button" id="cancelDelete">Cancelar</button>
+                                        <button class="confirm-button" id="confirmDelete">Eliminar</button>
                                     </div>
                                 </div>
-                            </td>                            
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <br>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button class="btn-descargar">
-                        Descargar <i class="fa-solid fa-download"></i>
-                    </button>
-                </div>
+                            </div>
+                        </td>                            
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn-descargar">
+                    Descargar <i class="fa-solid fa-download"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -388,7 +386,6 @@
         });
     </script>
 
-
     <!--Script para el botón desplegable-->
     <script>
         function toggleDropdown() {
@@ -436,7 +433,7 @@
     
                 const componentes = [...nombres, ...apellidos];
                 usuarioGenerado = componentes.map(palabra => palabra.substring(0, 2)).join('');
-                usuarioGenerado = `P${usuarioGenerado}`;
+                usuarioGenerado = `P${usuarioGenerado}`.toUpperCase();
                 document.getElementById('usuario').value = usuarioGenerado;
             }
     
@@ -448,7 +445,6 @@
             .catch(error => console.error('Error:', error));
         }
     </script>
-
 
     <!--Script para eliminar-->
     <script>
@@ -504,7 +500,6 @@
             }
         });
     </script>
-
 </body>
 </html>
 

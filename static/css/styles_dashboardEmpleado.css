@@ -173,7 +173,7 @@ h4{
     z-index: 2;
 }
 
-.button-container a {
+.button-container button {
     width: 100%;
     max-width: 40rem;
     margin: 0 auto;
@@ -188,6 +188,12 @@ h4{
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     transition: box-shadow 0.3s ease;
     z-index: 2;
+    border: none; /* Quita el borde por defecto de los botones */
+    cursor: pointer; /* Asegura que el puntero sea una mano */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem; /* Espacio entre icono y texto */
 }
 
 .btn-custom-1 {
@@ -200,22 +206,18 @@ h4{
     border: 1px solid #014CB9;
 }
 
-.btn-custom-3 {
-    background-color: #4DAD33;
-    border: 1px solid #4DAD33;
-}
-
 .btn-custom-1:hover {
     background-color: #e0b906;
     border-color: #e0b906;
 }
 
-.btn-custom-3:hover {
-    background-color: #3d8c27;
-    border-color: #3d8c27;
+.btn-custom-2:hover {
+    background-color: #013f9b;
+    border-color: #013f9b;
 }
 
-.button-container a::before {
+/* Flechas decorativas */
+.button-container button::before {
     content: "";
     width: 7rem;
     height: 6rem;
@@ -228,12 +230,11 @@ h4{
     z-index: 2;
 }
 
-.button-container a:nth-child(2)::before,
-.button-container a:nth-child(4)::before {
+.button-container button:nth-child(2)::before {
     left: 95%;
 }
 
-.button-container a::after {
+.button-container button::after {
     content: "";
     width: 6.5rem;
     height: 5.5rem;
@@ -246,12 +247,12 @@ h4{
     z-index: 3;
 }
 
-.button-container a:nth-child(2)::after,
-.button-container a:nth-child(4)::after {
+.button-container button:nth-child(2)::after{
     left: 95%;
 }
 
-.button-container a i {
+/* Ajustes para los íconos dentro del botón */
+.button-container button i {
     position: absolute;
     top: 50%;
     left: 5%;
@@ -261,10 +262,10 @@ h4{
     z-index: 4;
 }
 
-.button-container a:nth-child(2) i,
-.button-container a:nth-child(4) i {
+.button-container button:nth-child(2) i{
     left: 95%;
 }
+
 
 /* Contenedor del modal para el mapache*/
 .modal {
@@ -362,3 +363,139 @@ p{
     border-radius: 50px;
     cursor: pointer;
 }
+
+/* Estilos para toda mi página del carrusel */
+.modal2 {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+.modal-content2 {
+    position: relative;
+    background: white;
+    padding: 25px;
+    border-radius: 35px;
+    text-align: center;
+    width: 35%;
+    max-width: 500px;
+    z-index: 2;
+    box-shadow: 0 4px 10px black;
+    border-right: 5px solid #014cb9;
+    border-bottom: 5px solid #014cb9;
+}
+.close2 {
+    color: #ffffff;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+/* Estilos del carrusel */
+.carousel {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    position: relative;
+}
+.carousel-slide {
+    width: 100%;
+    display: none;
+    position: relative;
+    text-align: center;
+}
+.carousel-slide.active {
+    display: block;
+}
+.mapache-image {
+    width: 240px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+/* Ajustar posiciones por slide */
+.slide1 {
+    top: 20px;  /* Ajusta para que flote bien */
+}
+.slide2 {
+    top: 15px;  /* Puedes modificar la altura */
+}
+/* Solo muestra la imagen del slide activo */
+.modal2 .mapache-image {
+    display: none; /* Oculta todas por defecto */
+}
+.modal2 .mapache-image.active {
+    display: block;
+    opacity: 1;
+    top: 22px;
+}
+.icon2 {
+    width: 55px;
+    height: 55px;
+    background-color: red;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    margin: 5px auto;
+}
+.carousel-controls {
+    margin-top: 10px;
+}
+
+.btn-custom-3 {
+    background-color: #4DAD33;
+    border: 1px solid #4DAD33;
+    width: 100%;
+    max-width: 40rem;
+    margin: 0 auto;
+    text-align: center;
+    padding: 1.3rem;
+    border-radius: 50px;
+    text-decoration: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: box-shadow 0.3s ease;
+    border: none; /* Quita el borde por defecto de los botones */
+    cursor: pointer; /* Asegura que el puntero sea una mano */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem; /* Espacio entre icono y texto */
+}
+
+.btn-custom-3:hover {
+    background-color: #3d8c27;
+    border-color: #3d8c27;
+}
+
+/* Flechas de navegación */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 10;
+    color: #ffffff;
+}
+
+.prev { left: 30px; } 
+.next { right: 30px; } 

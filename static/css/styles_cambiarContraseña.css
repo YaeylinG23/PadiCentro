@@ -45,15 +45,6 @@ body {
     text-align: center;
 }
 
-.login-container img {
-    width: 180px;
-    height: 180px;
-    margin-bottom: 1px;
-    position: relative; /* Permite usar top para ajustar la posición */
-    top: -120px; /* Ajusta este valor para mover la imagen hacia arriba */
-    z-index: 1; 
-}
-
 .login-container h1 {
     font-size: 22px;
     margin-top: -100px; /* Reduce el espacio entre el logo y el título */
@@ -114,7 +105,6 @@ button {
 button:hover {
     background-color: #0056b3;
 }
-
 
 .remember {
     display: flex;

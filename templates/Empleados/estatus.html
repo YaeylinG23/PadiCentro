@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <style>
     /* Estilos para toda mi página del carrusel */
     .modal2 {
@@ -52,11 +54,22 @@
     .carousel-slide.active {
         display: block;
     }
-    
+    .mapache-image {
+        width: 220px;
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 16px;
+        opacity: 0; /* Inicialmente invisible */
+    }
+
+    .mapache-image.loaded {
+        opacity: 1; /* Visible cuando está cargada */
+    }
+
     .icon2 {
         width: 55px;
         height: 55px;
-        background-color: red;
         color: white;
         display: flex;
         justify-content: center;
@@ -64,6 +77,19 @@
         border-radius: 50%;
         font-size: 30px;
         margin: 5px auto;
+    }
+
+    /* Estilos específicos para cada estado */
+    .icon2.aprobado {
+        background-color: #4CAF50; /* Verde para "APROBADO" */
+    }
+
+    .icon2.rechazado {
+        background-color: #F44336; /* Rojo para "RECHAZADO" */
+    }
+
+    .icon2.pendiente {
+        background-color: #FFC107; /* Amarillo para "PENDIENTE" */
     }
     .carousel-controls {
         margin-top: 10px;
@@ -121,6 +147,8 @@
 
 <!-- Modal para el estatus-->
 <div class="modal2" id="modal">
+    <!-- Imagen del mapache fuera del modal -->
+    <img src="{{ url_for('static', filename='img/mapache.png') }}" alt="Mapache" class="mapache-image">
     <div class="prev" id="prev">&#10094;</div>
     <div class="modal-content2">
         <span class="close2" id="closeModal">&times;</span>
@@ -130,6 +158,7 @@
     </div>
     <div class="next" id="next">&#10095;</div>
 </div>
+
 
 <script>
     // Modal
@@ -157,31 +186,76 @@
     let currentSlide = 0;
 
     // Función para cargar las solicitudes desde el servidor
+    const rutaBaseImagenes = "{{ url_for('static', filename='img/') }}";
+
+    // Precargar las imágenes de los mapaches
+    window.addEventListener("load", () => {
+        const estados = ["aprobado", "rechazado", "pendiente"]; // Lista de estados posibles
+        estados.forEach(estado => {
+            const img = new Image();
+            img.src = `{{ url_for('static', filename='img/mapache_${estado}.png') }}`;
+        });
+    });
+
     function cargarSolicitudes() {
-        fetch('/solicitudes_usuario')
-            .then(response => response.json())
-            .then(data => {
-                console.log("Datos recibidos:", data); // Verifica los datos en la consola
-                const carousel = document.getElementById("carousel");
-                carousel.innerHTML = ""; // Limpia el carrusel antes de agregar nuevos slides
-                data.forEach((solicitud, index) => {
-                    const slide = document.createElement("div");
-                    slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`;
-                    slide.innerHTML = `
-                        <div class="icon2">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>                    
-                        <h3>${solicitud.tipo}</h3>
-                        <p class="status-text">${solicitud.estado}</p>
-                        <small>${solicitud.mes_anio}</small>
-                        <p>${solicitud.descripcion}</p>
-                    `;
-                    carousel.appendChild(slide);
-                });
-                slides = document.querySelectorAll(".carousel-slide"); // Actualiza la lista de slides
-                mostrarSlide(currentSlide); // Muestra el primer slide
-            })
-            .catch(error => console.error('Error al cargar las solicitudes:', error));
+    fetch('/verestatus')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Datos recibidos:", data);
+            const carousel = document.getElementById("carousel");
+            carousel.innerHTML = ""; // Limpia el carrusel antes de agregar nuevos slides
+            data.forEach((solicitud, index) => {
+                const slide = document.createElement("div");
+                slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`;
+
+                // Asignar icono y clase según el estado
+                let icono, claseIcono;
+                switch (solicitud.estado.toLowerCase()) {
+                    case "aprobado":
+                        icono = "fa-check";
+                        claseIcono = "aprobado";
+                        break;
+                    case "rechazado":
+                        icono = "fa-times";
+                        claseIcono = "rechazado";
+                        break;
+                    case "pendiente":
+                        icono = "fa-clock";
+                        claseIcono = "pendiente";
+                        break;
+                    default:
+                        icono = "fa-question"; // Icono por defecto
+                        claseIcono = "default";
+                }
+
+                slide.innerHTML = `
+                    <div class="icon2 ${claseIcono}">
+                        <i class="fa-solid ${icono}"></i>
+                    </div>                    
+                    <h3>${solicitud.tipo}</h3>
+                    <p class="status-text">${solicitud.estado}</p>
+                    <small>${solicitud.creado_en}</small>
+                    <p>Descripción del admin</p>
+                `;
+                carousel.appendChild(slide);
+            });
+
+            // Actualiza la lista de slides
+            slides = document.querySelectorAll(".carousel-slide");
+
+            // Actualiza la imagen del mapache según el estado de la primera solicitud
+            const primeraSolicitud = data[0];
+            const imagenMapache = document.querySelector(".mapache-image");
+            if (primeraSolicitud) {
+                const nuevaImagen = new Image();
+                nuevaImagen.src = `${rutaBaseImagenes}mapache_${primeraSolicitud.estado.toLowerCase()}.png`;
+                nuevaImagen.onload = () => {
+                    imagenMapache.src = nuevaImagen.src;
+                    imagenMapache.classList.add("loaded"); // Mostrar la imagen
+                };
+            }
+        })
+        .catch(error => console.error('Error al cargar las solicitudes:', error));
     }
 
     // Función para mostrar un slide específico
@@ -190,6 +264,16 @@
             slide.classList.remove("active");
             if (i === index) {
                 slide.classList.add("active");
+
+                // Actualizar la imagen del mapache según el estado del slide actual
+                const estado = slide.querySelector(".status-text").textContent.toLowerCase();
+                const imagenMapache = document.querySelector(".raccoon-image");
+                const nuevaImagen = new Image();
+                nuevaImagen.src = `${rutaBaseImagenes}mapache_${estado}.png`;
+                nuevaImagen.onload = () => {
+                    imagenMapache.src = nuevaImagen.src;
+                    imagenMapache.classList.add("loaded"); // Mostrar la imagen
+                };
             }
         });
     }

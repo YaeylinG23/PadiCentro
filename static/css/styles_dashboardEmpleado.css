@@ -267,7 +267,7 @@ h4{
 }
 
 
-/* Contenedor del modal para el mapache*/
+/* Contenedor del modal para el mapache cerrar sesión*/
 .modal {
     display: none;
     position: fixed;
@@ -318,7 +318,6 @@ h4{
     font-size: 30px;
     margin: 11px auto;
 }
-
 
 p{
     margin-top: 0px;
@@ -380,10 +379,10 @@ p{
 .modal-content2 {
     position: relative;
     background: white;
-    padding: 25px;
+    padding: 23px;
     border-radius: 35px;
     text-align: center;
-    width: 35%;
+    width: 36%;
     max-width: 500px;
     z-index: 2;
     box-shadow: 0 4px 10px black;
@@ -412,49 +411,59 @@ p{
     display: none;
     position: relative;
     text-align: center;
+    flex: 0 0 100%; /* Evita que los slides se desborden */
 }
 .carousel-slide.active {
     display: block;
 }
 .mapache-image {
-    width: 240px;
-    position: absolute;
+    width: 220px;
+    position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2;
+    top: 16px;
+    opacity: 0; /* Inicialmente invisible */
 }
-/* Ajustar posiciones por slide */
-.slide1 {
-    top: 20px;  /* Ajusta para que flote bien */
+
+.mapache-image.loaded {
+    opacity: 1; /* Visible cuando está cargada */
 }
-.slide2 {
-    top: 15px;  /* Puedes modificar la altura */
-}
-/* Solo muestra la imagen del slide activo */
-.modal2 .mapache-image {
-    display: none; /* Oculta todas por defecto */
-}
-.modal2 .mapache-image.active {
-    display: block;
-    opacity: 1;
-    top: 22px;
-}
+
 .icon2 {
     width: 55px;
-    height: 55px;
-    background-color: red;
+    height: 54px;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    font-size: 30px;
-    margin: 5px auto;
+    font-size: 35px;
+    margin: 0px auto;
+}
+
+/* Estilos específicos para cada estado */
+.icon2.aprobado {
+    background-color: #4CAF50; /* Verde para "APROBADO" */
+}
+
+.icon2.rechazado {
+    background-color: #F44336; /* Rojo para "RECHAZADO" */
+}
+
+.icon2.pendiente {
+    background-color: #FFC107; /* Amarillo para "PENDIENTE" */
 }
 .carousel-controls {
     margin-top: 10px;
 }
 
+h3{
+    margin-top: 20px;
+    margin-bottom: 1.5rem;
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+}
 .btn-custom-3 {
     background-color: #4DAD33;
     border: 1px solid #4DAD33;
@@ -478,12 +487,10 @@ p{
     justify-content: center;
     gap: 1rem; /* Espacio entre icono y texto */
 }
-
 .btn-custom-3:hover {
     background-color: #3d8c27;
     border-color: #3d8c27;
 }
-
 /* Flechas de navegación */
 .prev, .next {
     position: absolute;
@@ -496,10 +503,11 @@ p{
     z-index: 10;
     color: #ffffff;
 }
-
+.prev:hover, .next:hover {
+    color: #014cb9; /* Cambia el color al hacer hover */
+}
 .prev { left: 30px; } 
 .next { right: 30px; } 
-
 
 /* styles_dashboardEmpleado.css */
 /* ========== MODAL PRINCIPAL ========== */

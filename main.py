@@ -782,66 +782,43 @@ def historial_empleados():
             conn.close()
 
 
-# Función para conectar a la base de datos
-def get_db_connection():
-    conn = psycopg2.connect(
-        host='localhost',
-        database='postgres2',
-        user='postgres',
-        password='024689'
-    )
-    return conn
-
-
-@app.route('/historial_empleados_json')
-def historial_empleados_json():
+@app.route('/verestatus')
+def verestatus():
     id_uem = session.get('id_uem')
     if not id_uem:
-        return redirect(url_for('login'))
+        return jsonify({"error": "No autorizado"}), 401  # Devuelve un error si no hay sesión
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
             SELECT 
-                to_char(fecha_inicio, 'TMMonth YYYY') AS mes_anio,
+                s.creado_en,  -- Selecciona la columna creado_en
                 s.tipo,
-                s.estado,
-                CASE 
-                    WHEN s.tipo = 'VACACIONES' THEN '---'
-                    WHEN s.tipo = 'PERMISO' THEN p.comentario
-                    WHEN s.tipo = 'INCAPACIDAD' THEN i.comentario
-                    ELSE '---'
-                END AS descripcion,
+                s.estado
             FROM solicitudes s
-            LEFT JOIN colaboradores c ON s.id_uem = c.id_uem
-            LEFT JOIN permisos p ON s.id = p.solicitud_id
-            LEFT JOIN incapacidades i ON s.id = i.solicitud_id
             WHERE s.id_uem = %s
-            ORDER BY s.fecha_inicio DESC
+            ORDER BY s.creado_en DESC  -- Ordena por la fecha de creación
         """, (id_uem,))
         solicitudes = cur.fetchall()
         solicitudes_list = []
         for row in solicitudes:
+            # Formatea la fecha creado_en (si es necesario)
+            fecha_formateada = row[0].strftime("%d/%m/%Y")  # Formato: dd/mm/yyyy
             solicitudes_list.append({
-                "mes_anio": row[0],
-                "tipo": row[4].strip().upper(),
-                "estado": row[5],
-                "descripcion": row[6]
+                "creado_en": fecha_formateada,  # Usa la fecha formateada
+                "tipo": row[1].strip().upper(),  # Tipo de solicitud
+                "estado": row[2]  # Estado de la solicitud
             })
-        return jsonify(solicitudes_list)
+        return jsonify(solicitudes_list)  # Devuelve los datos en formato JSON
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500  # Devuelve un error en formato JSON
     finally:
         if cur:
             cur.close()
         if conn:
             conn.close()
 
-
-
-@app.route('/estatus')
-def estatus():
-    return render_template('Empleados/estatus.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

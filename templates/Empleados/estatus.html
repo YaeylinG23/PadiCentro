@@ -1,0 +1,215 @@
+<style>
+    /* Estilos para toda mi página del carrusel */
+    .modal2 {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .modal-content2 {
+        position: relative;
+        background: white;
+        padding: 25px;
+        border-radius: 35px;
+        text-align: center;
+        width: 35%;
+        max-width: 500px;
+        z-index: 2;
+        box-shadow: 0 4px 10px black;
+        border-right: 5px solid #014cb9;
+        border-bottom: 5px solid #014cb9;
+    }
+    .close2 {
+        color: #ffffff;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    /* Estilos del carrusel */
+    .carousel {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+        position: relative;
+    }
+    .carousel-slide {
+        width: 100%;
+        display: none;
+        position: relative;
+        text-align: center;
+        flex: 0 0 100%; /* Evita que los slides se desborden */
+    }
+    .carousel-slide.active {
+        display: block;
+    }
+    
+    .icon2 {
+        width: 55px;
+        height: 55px;
+        background-color: red;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        font-size: 30px;
+        margin: 5px auto;
+    }
+    .carousel-controls {
+        margin-top: 10px;
+    }
+    .btn-custom-3 {
+        background-color: #4DAD33;
+        border: 1px solid #4DAD33;
+        width: 100%;
+        max-width: 40rem;
+        margin: 0 auto;
+        text-align: center;
+        padding: 1.3rem;
+        border-radius: 50px;
+        text-decoration: none;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: relative;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        transition: box-shadow 0.3s ease;
+        border: none; /* Quita el borde por defecto de los botones */
+        cursor: pointer; /* Asegura que el puntero sea una mano */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem; /* Espacio entre icono y texto */
+    }
+    .btn-custom-3:hover {
+        background-color: #3d8c27;
+        border-color: #3d8c27;
+    }
+    /* Flechas de navegación */
+    .prev, .next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 40px;
+        cursor: pointer;
+        z-index: 10;
+        color: #ffffff;
+    }
+    .prev:hover, .next:hover {
+        color: #014cb9; /* Cambia el color al hacer hover */
+    }
+    .prev { left: 30px; } 
+    .next { right: 30px; } 
+</style>
+
+<button class="btn-custom-3" id="openModal">
+    <i class="fa-solid fa-users"></i> <!-- Ícono de Font Awesome -->
+    Estatus de permisos y vacaciones
+</button>
+
+<!-- Modal para el estatus-->
+<div class="modal2" id="modal">
+    <div class="prev" id="prev">&#10094;</div>
+    <div class="modal-content2">
+        <span class="close2" id="closeModal">&times;</span>
+        <div class="carousel" id="carousel">
+            <!-- Slides se generan dinámicamente aquí -->
+        </div>
+    </div>
+    <div class="next" id="next">&#10095;</div>
+</div>
+
+<script>
+    // Modal
+    const modal = document.getElementById("modal");
+    const openModal = document.getElementById("openModal");
+    const closeModal = document.getElementById("closeModal");
+
+    openModal.addEventListener("click", () => {
+        modal.style.display = "flex";
+        cargarSolicitudes(); // Carga las solicitudes al abrir el modal
+    });
+
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    // Carrusel
+    let slides = [];
+    let currentSlide = 0;
+
+    // Función para cargar las solicitudes desde el servidor
+    function cargarSolicitudes() {
+        fetch('/solicitudes_usuario')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Datos recibidos:", data); // Verifica los datos en la consola
+                const carousel = document.getElementById("carousel");
+                carousel.innerHTML = ""; // Limpia el carrusel antes de agregar nuevos slides
+                data.forEach((solicitud, index) => {
+                    const slide = document.createElement("div");
+                    slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`;
+                    slide.innerHTML = `
+                        <div class="icon2">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>                    
+                        <h3>${solicitud.tipo}</h3>
+                        <p class="status-text">${solicitud.estado}</p>
+                        <small>${solicitud.mes_anio}</small>
+                        <p>${solicitud.descripcion}</p>
+                    `;
+                    carousel.appendChild(slide);
+                });
+                slides = document.querySelectorAll(".carousel-slide"); // Actualiza la lista de slides
+                mostrarSlide(currentSlide); // Muestra el primer slide
+            })
+            .catch(error => console.error('Error al cargar las solicitudes:', error));
+    }
+
+    // Función para mostrar un slide específico
+    function mostrarSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.remove("active");
+            if (i === index) {
+                slide.classList.add("active");
+            }
+        });
+    }
+
+    // Eventos para los botones de navegación
+    document.getElementById("prev").addEventListener("click", () => {
+        if (currentSlide === 0) {
+            currentSlide = slides.length - 1;
+        } else {
+            currentSlide = currentSlide - 1;
+        }
+        mostrarSlide(currentSlide);
+    });
+
+    document.getElementById("next").addEventListener("click", () => {
+        if (currentSlide === slides.length - 1) {
+            currentSlide = 0;
+        } else {
+            currentSlide = currentSlide + 1;
+        }
+        mostrarSlide(currentSlide);
+    });
+</script>

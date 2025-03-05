@@ -28,7 +28,7 @@
             <!-- Modal de confirmación -->
             <div id="logoutModal" class="modal">
                 <div class="modal-content">
-                    <img src="{{ url_for('static', filename='img/mapache_aceptado.png') }}" alt="Mapache" class="raccoon-image">
+                    <img src="{{ url_for('static', filename='img/mapache_aprobado.png') }}" alt="Mapache" class="raccoon-image">
                     <div class="warning-icon">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>                    
@@ -53,9 +53,41 @@
         <div class="content-button">
             <div class="dropdown">
                 <button onclick="toggleDropdown()" class="dropbtn">
-                    Filtrar empleados <i class="fa-solid fa-angle-down"></i>
+                    Filtrar usuarios <i class="fa-solid fa-angle-down"></i>
                 </button>
                 <div id="dropdownMenu" class="dropdown-content">
+                    {% for empleado in empleados %}
+                    <label>
+                        <input type="checkbox" class="empleado-checkbox" 
+                               value="{{ empleado[0] }}" 
+                               {% if empleado[0]|int in selected_ids %}checked{% endif %}>
+                        {{ empleado[1] }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button onclick="toggleDropdown()" class="dropbtn2">
+                    Filtrar por tipo <i class="fa-solid fa-angle-down"></i>
+                </button>
+                <div id="dropdownMenu" class="dropdown-content2">
+                    {% for empleado in empleados %}
+                    <label>
+                        <input type="checkbox" class="empleado-checkbox" 
+                               value="{{ empleado[0] }}" 
+                               {% if empleado[0]|int in selected_ids %}checked{% endif %}>
+                        {{ empleado[1] }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button onclick="toggleDropdown()" class="dropbtn3">
+                    Filtrar por tipo <i class="fa-solid fa-angle-down"></i>
+                </button>
+                <div id="dropdownMenu" class="dropdown-content3">
                     {% for empleado in empleados %}
                     <label>
                         <input type="checkbox" class="empleado-checkbox" 
@@ -78,8 +110,8 @@
                           <th>Mes / Año</th>
                           <th>Nombre del usuario</th>
                           <th>Fecha inicio</th>
-                          <th>Fecha fin</th>
-                          <th>Días totales</th>
+                          <th>Fecha final</th>
+                          <th>Días solicitados</th>
                           <th>Tipo</th>
                           <th>Descripción</th>
                           <th>Estado</th>

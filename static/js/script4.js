@@ -42,3 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aplicar filtro inicial
     filterByType();
 });
+// En script4.js cambia:
+function descargarHistorial() {
+    window.location.href = "/descargar_historial"; // URL directa
+}

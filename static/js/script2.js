@@ -22,10 +22,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Función para verificar solicitudes pendientes
+    async function tieneSolicitudPendiente(tipo) {
+        try {
+            const response = await fetch('/verestatus');
+            const data = await response.json();
+            return data.some(s => s.tipo === tipo && s.estado === 'PENDIENTE');
+        } catch (error) {
+            console.error('Error:', error);
+            return false;
+        }
+    }
+
     // Deshabilitar campos para VACACIONES y obtener días disponibles
     document.querySelectorAll('input[name="tipo"]').forEach(radio => {
         radio.addEventListener('change', async (e) => {
-            const isVacaciones = e.target.value === 'VACACIONES';
+            const tipo = e.target.value;
+            const pendiente = await tieneSolicitudPendiente(tipo);
+            
+            if (pendiente) {
+                alert(`Ya tienes una solicitud de ${tipo} pendiente!`);
+                e.target.checked = false;
+                return;
+            }
+
+            const isVacaciones = tipo === 'VACACIONES';
             comentario.disabled = isVacaciones;
             comentario.style.backgroundColor = isVacaciones ? '#f5f5f5' : 'white';
             archivo.disabled = isVacaciones;
@@ -51,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Validación al enviar el formulario
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
         const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
         const fechaInicioVal = fechaInicio.value;
         const fechaFinVal = fechaFin.value;
@@ -60,6 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!fechaInicioVal || !fechaFinVal) {
             alert("Selecciona fechas válidas.");
+            event.preventDefault();
+            return;
+        }
+
+        if (tipo && await tieneSolicitudPendiente(tipo)) {
+            alert(`No puedes enviar otra solicitud de ${tipo} con una pendiente!`);
             event.preventDefault();
             return;
         }
@@ -86,14 +113,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 return;
             }
+
             if (!comentarioTexto) {
                 alert("Debes escribir un comentario.");
+                event.preventDefault();
+                return;
+            }
+
+            // Validar archivo
+            const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+            const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'pdf'];
+            const archivoSubido = archivo.files[0];
+            const extension = archivoSubido.name.split('.').pop().toLowerCase();
+
+            if (!tiposPermitidos.includes(archivoSubido.type) || !extensionesPermitidas.includes(extension)) {
+                alert("❌ Formato no válido. Solo se permiten JPEG, PNG o PDF.");
                 event.preventDefault();
                 return;
             }
         }
     });
 });
+
+// Función para validar el archivo al seleccionarlo
+function validarArchivo(input) {
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'pdf'];
+    
+    if (input.files.length > 0) {
+        const archivo = input.files[0];
+        const extension = archivo.name.split('.').pop().toLowerCase();
+        
+        if (!tiposPermitidos.includes(archivo.type) || !extensionesPermitidas.includes(extension)) {
+            alert("❌ Formato no válido. Solo se permiten: JPG, PNG, PDF");
+            input.value = ""; // Limpia el input
+        }
+    }
+}
 
 // Funciones de control del modal
 function openSolicitudModal() {
@@ -103,7 +159,6 @@ function openSolicitudModal() {
 function closeSolicitudModal() {
     document.getElementById('solicitudModal').style.display = 'none';
 }
-
 
 // Control del dropdown de tipos
 document.getElementById('tipoSolicitudBtn').addEventListener('click', function(e) {

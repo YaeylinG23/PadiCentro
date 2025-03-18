@@ -1,39 +1,61 @@
 document.addEventListener("DOMContentLoaded", function() {
-    function getSelectedIdsFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        const ids = params.get('filter_ids') || '';
-        return ids.split(',').filter(id => id !== '').map(id => parseInt(id));
+    function updateFilters() {
+        const selectedIds = Array.from(document.querySelectorAll('.empleado-checkbox:checked'))
+                               .map(cb => cb.value).join(',');
+        const selectedTypes = Array.from(document.querySelectorAll('.tipo-checkbox:checked'))
+                                .map(cb => cb.value).join(',');
+        const selectedStatus = Array.from(document.querySelectorAll('.estado-checkbox:checked'))
+                                 .map(cb => cb.value).join(',');
+
+        const params = new URLSearchParams();
+        if (selectedIds) params.set('filter_ids', selectedIds);
+        if (selectedTypes) params.set('filter_types', selectedTypes);
+        if (selectedStatus) params.set('filter_status', selectedStatus);
+
+        window.location.search = params.toString();
     }
 
-    function toggleDropdown() {
-        document.getElementById("dropdownMenu").classList.toggle("show");
+    function restoreCheckboxes(selector, values) {
+        values.forEach(value => {
+            const checkbox = document.querySelector(`${selector}[value="${value}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
     }
 
-    function filterTable() {
-        const selectedIds = Array.from(document.querySelectorAll('#dropdownMenu .empleado-checkbox:checked'))
-                                .map(cb => cb.value);
-        window.location.search = `?filter_ids=${selectedIds.join(',')}`;
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    restoreCheckboxes('.empleado-checkbox', urlParams.get('filter_ids')?.split(',') || []);
+    restoreCheckboxes('.tipo-checkbox', urlParams.get('filter_types')?.split(',') || []);
+    restoreCheckboxes('.estado-checkbox', urlParams.get('filter_status')?.split(',') || []);
 
-    // Restaurar checkboxes desde la URL
-    const selectedIds = getSelectedIdsFromURL();
-    selectedIds.forEach(id => {
-        const checkbox = document.querySelector(`.empleado-checkbox[value="${id}"]`);
-        if (checkbox) checkbox.checked = true;
+    document.querySelectorAll('.dropdown-content input, .dropdown-content2 input, .dropdown-content3 input').forEach(checkbox => {
+        checkbox.addEventListener('change', updateFilters);
     });
-
-    // Event listeners
-    document.querySelector('.dropbtn').addEventListener('click', toggleDropdown);
-    document.querySelectorAll('#dropdownMenu .empleado-checkbox').forEach(cb => {
-        cb.addEventListener('change', filterTable);
-    });
-
-    // Cerrar dropdown al hacer clic fuera
-    window.onclick = function(e) {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                dropdown.classList.remove('show');
-            });
-        }
-    }
 });
+
+function toggleDropdown(dropdownId) {
+    // Cerrar otros dropdowns antes de abrir el seleccionado
+    document.querySelectorAll('.dropdown-content, .dropdown-content2, .dropdown-content3').forEach(dropdown => {
+        if (dropdown.id !== dropdownId) {
+            dropdown.classList.remove("show");
+        }
+    });
+
+    // Alternar el estado del dropdown seleccionado
+    document.getElementById(dropdownId).classList.toggle("show");
+}
+
+// Cerrar dropdowns al hacer clic fuera
+window.onclick = function(e) {
+    if (!e.target.matches('.dropbtn') &&
+        !e.target.matches('.dropbtn2') &&
+        !e.target.matches('.dropbtn3')) {
+
+        document.querySelectorAll('.dropdown-content, .dropdown-content2, .dropdown-content3').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+};
+
+function descargarHistorialAdmin() {
+    window.location.href = "/descargar_historial_admin";
+}

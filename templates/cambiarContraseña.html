@@ -6,11 +6,9 @@
     <title>Cambiar contraseña</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_cambiarContraseña.css') }}">
-    <!-- Cargar íconos de FontAwesome -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
     <div class="background-carousel">
         <div class="slide active">
             <img src="./static/img/banner.jpg" alt="Fondo 1">
@@ -24,51 +22,68 @@
     </div>
     
     <div class="login-container">
-
-        <!-- Título -->
-        <h1>CAMBIAR CONTRASEÑA</h1>
-
-        <!-- Formulario -->
-        <form method="post">
-            {% if error %}
-            <p class="error">{{ error }}</p>
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    {{ messages[0] }}
+                </div>
             {% endif %}
-            <!-- Campo de usuario -->
-            <p>Para proteger tu cuenta, cambia la contraseña proporcionada en tu correo.</p>
-            <!-- Campo de contraseña -->
+        {% endwith %}
+
+        <!-- Mostrar errores -->
+        {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="post" onsubmit="return validarContraseña()">
+            <h1>CAMBIAR CONTRASEÑA</h1>
+            <p>Para proteger tu cuenta, cambia la contraseña temporal</p>
+            
+            <!-- Nueva contraseña -->
             <div class="input-field">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña" required>
-                <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility()"></i>
+                <input type="password" id="contrasena" name="contrasena" 
+                       placeholder="Nueva contraseña" required>
+                <i class="fas fa-eye toggle-password" 
+                   onclick="togglePasswordVisibility('contrasena', this)"></i>
             </div>
-
-            <!-- Botón -->
-            <button type="submit">Iniciar sesión</button>
+            
+            <!-- Confirmar contraseña -->
+            <div class="input-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="confirmar_contrasena" 
+                       name="confirmar_contrasena" 
+                       placeholder="Confirmar nueva contraseña" required>
+                <i class="fas fa-eye toggle-password" 
+                   onclick="togglePasswordVisibility('confirmar_contrasena', this)"></i>
+            </div>
+            
+            <button type="submit">Aceptar</button>
         </form>
     </div>
 
-    <!--Script para el carrusel -->
+    <!-- Scripts -->
     <script>
+        // Carrusel de fondos
         document.addEventListener("DOMContentLoaded", function () {
             const slides = document.querySelectorAll(".slide");
             let currentSlide = 0;
-    
+
             function changeSlide() {
                 slides[currentSlide].classList.remove("active");
                 currentSlide = (currentSlide + 1) % slides.length;
                 slides[currentSlide].classList.add("active");
             }
-    
-            setInterval(changeSlide, 3000); // Cambia cada 4 segundos
+            setInterval(changeSlide, 3000);
         });
-    </script>
-    
-    <!--Script para ocultar contraseña -->
-    <script>
+
+        // Mostrar/ocultar contraseña
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('contrasena');
             const toggleIcon = document.querySelector('.toggle-password');
-        
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 toggleIcon.classList.remove('fa-eye');
@@ -78,6 +93,30 @@
                 toggleIcon.classList.remove('fa-eye-slash');
                 toggleIcon.classList.add('fa-eye');
             }
+        }
+
+        // Validación de contraseña
+        function validarContraseña() {
+            const nueva = document.getElementById('contrasena').value;
+            const confirmacion = document.getElementById('confirmar_contrasena').value;
+            const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+
+            if (nueva !== confirmacion) {
+                alert('Las contraseñas no coinciden');
+                return false;
+            }
+
+            if (!regex.test(nueva)) {
+                alert('La contraseña debe tener:\n- Mínimo 8 caracteres\n- Al menos una mayúscula\n- Al menos una minúscula\n- Al menos un número');
+                return false;
+            }
+
+            if (nueva.startsWith('TEMP_')) {
+                alert('No puedes usar una contraseña temporal');
+                return false;
+            }
+
+            return true;
         }
     </script>
 </body>

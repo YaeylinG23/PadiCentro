@@ -123,7 +123,7 @@
 
     .content2{
         margin-top: 20px;
-
+        padding: 20px;
     }
 
     .decorations-container {
@@ -625,16 +625,17 @@
         font-size: 20px; /* Tamaño de los íconos */
         margin: 0 5px; /* Espacio entre los íconos */
         transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+        opacity: 1 !important; 
     }
 
     /* Estilo específico para el ícono de editar */
-    .fa-edit {
-        color: #014CB9; /* Color azul */
+    .btn-editar {
+        color: #014CB9 !important;  /* Color azul */
     }
 
     /* Estilo específico para el ícono de eliminar */
-    .fa-trash {
-        color: #FF000B; /* Color rojo */
+    .btn-eliminar {
+        color: #ff4444 !important;  /* Color rojo */
     }
 
     /* Efecto al pasar el mouse sobre los íconos */
@@ -789,7 +790,7 @@ p{
     border-radius: 40px;
     text-align: center;
     position: relative;
-    width: 380px;
+    width: 500px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: revert-layer;
 
@@ -819,5 +820,51 @@ p{
     font-size: 30px;
     margin: 11px auto;
 }
+/* Estilos nuevos */
+.table-custom {
+    overflow-x: auto;  /* Scroll horizontal solo cuando sea necesario */
+    display: block;    /* Requerido para scroll en tablas */
+}
 
+.table-custom td:nth-child(13) { /* Columna "Acciones" */
+    min-width: 120px;  /* Ancho mínimo garantizado */
+    position: sticky;  /* Fija la columna al hacer scroll */
+    right: 0;          /* Posición a la derecha */
+    background: white; /* Evita transparencia */
+    z-index: 2;        /* Prioridad sobre otras celdas */
+}
+/* Contenedor de la tabla (asegurar desplazamiento horizontal) */
+.table-wrapper {
+    overflow-x: auto; /* Habilitar scroll horizontal */
+    width: 100%;
+    margin: 0 auto;
+    border: 4px solid #014CB9;
+    border-radius: 50px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
 
+/* Ajustes para la tabla */
+.table-custom {
+    min-width: 1200px; /* Ancho mínimo para forzar scroll en pantallas pequeñas */
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Celdas de la tabla */
+.table-custom th,
+.table-custom td {
+    white-space: nowrap; /* Evitar saltos de línea */
+    min-width: 120px; /* Ancho mínimo por columna */
+    padding: 0.8rem !important; /* Espaciado interno consistente */
+    vertical-align: middle; /* Alineación vertical centrada */
+}
+
+/* Columna "Acciones" (posición sticky corregida) */
+.table-custom td:nth-child(13) {
+    position: sticky;
+    right: 0;
+    background: white;
+    z-index: 2;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1); /* Sombra para diferenciar */
+}

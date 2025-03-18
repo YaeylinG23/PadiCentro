@@ -13,13 +13,21 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 import os
+import re
 from datetime import datetime, timedelta, date, time
 import holidays
 from dateutil.relativedelta import relativedelta
+from io import BytesIO
 
 
 app = Flask(__name__)
 app.secret_key = 'Contreseña'
+
+def generar_contrasena(longitud=12):
+    # Asegurar que siempre empiece con TEMP_ y tenga la longitud correcta
+    temp_part = 'TEMP_'
+    random_part = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(longitud - len(temp_part)))
+    return temp_part + random_part
 
 class CustomJSONProvider(DefaultJSONProvider):
     def default(self, obj):
@@ -44,52 +52,86 @@ password='024689'
 # Conexión con el login
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    if 'usuario' in session:  
+    # Redirigir si ya hay sesión activa
+    if 'usuario' in session:
+        if session.get('password_temp'):
+            return redirect(url_for('cambiar_contraseña'))
         return redirect(url_for('dashboard_admin' if session.get('es_admin') else 'dashboard_empleados'))
     
+    # Manejar POST (envío de credenciales)
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        contrasena = request.form['contrasena']
+        nombre = request.form.get('nombre', '').strip()
+        contrasena = request.form.get('contrasena', '').strip()
         
-        try:
-            conexion = psycopg2.connect(host=host, database=database, user=user, password=password)
-            cursor = conexion.cursor()
-
-            # 1️⃣ Verificar si es admin
-            cursor.execute("SELECT id_usuario, nombre FROM USUARIO WHERE nombre = %s AND contrasena = %s", (nombre, contrasena))
-            usuario = cursor.fetchone()
+        if not nombre or not contrasena:
+            return render_template('login.html', error="Campos vacíos")
             
-            if usuario:
-                session['usuario'] = nombre
-                session['id_uem'] = usuario[0]  # Guarda el ID del admin
-                session['es_admin'] = True
-                print(f"Usuario admin en sesión: ID={session['id_uem']}, Nombre={session['usuario']}")  # Debug
-                return redirect(url_for('dashboard_admin'))
-            else:
-                # 2️⃣ Si no es admin, verificar colaboradores
-                cursor.execute("SELECT id_uem, usuario FROM colaboradores WHERE usuario = %s AND contrasena = %s", (nombre, contrasena))
-                empleado = cursor.fetchone()
+        conn = None
+        cursor = None
+        try:
+            # 1. Conexión a la base de datos
+            conn = psycopg2.connect(host=host, database=database, user=user, password=password)
+            cursor = conn.cursor()
+
+            # 2. Verificar ADMIN primero
+            cursor.execute("""
+                SELECT id_usuario, contrasena 
+                FROM USUARIO 
+                WHERE nombre = %s AND contrasena = %s
+            """, (nombre, contrasena))
+            admin = cursor.fetchone()
+            
+            if admin:
+                password_temp = admin[1].startswith('TEMP_')
+                # Configurar sesión para admin
+                session.update({
+                    'usuario': nombre,
+                    'id_uem': admin[0],
+                    'es_admin': True,
+                    'password_temp': password_temp
+                })
                 
-                if empleado:
-                    session['usuario'] = nombre
-                    session['id_uem'] = empleado[0]  # Guarda el ID del colaborador
-                    session['es_admin'] = False
-                    print(f"Colaborador en sesión: ID={session['id_uem']}, Nombre={session['usuario']}")  # Debug
-                    return redirect(url_for('dashboard_empleados'))
-                else:
-                    error = "Credenciales incorrectas"
-                    return render_template('login.html', error=error)
+                return redirect(url_for('cambiar_contraseña')) if password_temp else redirect(url_for('dashboard_admin'))
 
-        except Exception as error:
-            return f"Error: {error}"
+            # 3. Si no es admin, verificar COLABORADOR
+            cursor.execute("""
+                SELECT id_uem, contrasena 
+                FROM colaboradores 
+                WHERE usuario = %s AND contrasena = %s
+            """, (nombre, contrasena))
+            empleado = cursor.fetchone()
+            
+            if empleado:
+                password_temp = empleado[1].startswith('TEMP_')
+                # Configurar sesión para empleado
+                session.update({
+                    'usuario': nombre,
+                    'id_uem': empleado[0],
+                    'es_admin': False,
+                    'password_temp': password_temp
+                })
+                
+                return redirect(url_for('cambiar_contraseña')) if password_temp else redirect(url_for('dashboard_empleados'))
+
+            # 4. Si no coincide con ningún usuario
+            return render_template('login.html', error="Credenciales incorrectas")
+
+        except psycopg2.OperationalError as e:
+            print(f"Error de conexión: {str(e)}")
+            return render_template('login.html', error="Error de conexión a la base de datos")
+            
+        except Exception as e:
+            print(f"Error inesperado: {str(e)}")
+            return render_template('login.html', error="Error interno del servidor")
+            
         finally:
-            if 'cursor' in locals(): cursor.close()
-            if 'conexion' in locals(): conexion.close()
+            # 5. Limpieza garantizada de recursos
+            if cursor: cursor.close()
+            if conn: conn.close()
 
+    # GET: Mostrar página de login
     response = make_response(render_template('login.html'))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
     return response
 
 #Cerrar sesión
@@ -102,26 +144,29 @@ def logout():
 #Página principal del administrador
 @app.route('/dashboard_admin')
 def dashboard_admin():
-    if 'usuario' in session:
-        response = make_response(render_template('Admin/dashboard_admin.html', nombre=session['usuario']))
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
-    else:
+    if 'usuario' not in session:
         return redirect(url_for('login'))
+    if session.get('password_temp'):
+        return redirect(url_for('cambiar_contraseña'))
+    return render_template('Admin/dashboard_admin.html', nombre=session['usuario'])
 
-# Función para enviar el correo (Admin)
-EMAIL_EMISOR = 'garciayaytube@gmail.com'
-EMAIL_CONTRA  = 'tczj qcuu npyd ijwe'
 
+# Configuración de correo emisor (Ionos)
+EMAIL_EMISOR = "yaeylin.irais.garcia@yotoss.com"
+EMAIL_CONTRA = "Y43_1r4is&2024"
+
+# Función para enviar correo solo a dominios permitidos
 def send_email(user, password, receptor):
+    # Expresión regular para aceptar SOLO @yotoss.com y @padice.org
+    if not re.match(r"^[a-zA-Z0-9._%+-]+@(yotoss\.com|padice\.org)$", receptor):
+        print("❌ Error: Solo se pueden enviar correos a @yotoss.com o @padice.org")
+        return False  # 🔴 DETIENE el envío inmediatamente
+
     asunto = "Credenciales de acceso"
     cuerpo = f"""
     Tu usuario es: {user}
     Tu contraseña es: {password}
 
-    
     "Por seguridad, esta contraseña es temporal. Cámbiala al acceder a tu cuenta para mantener la confidencialidad de tu información."
     Saludos.
     """
@@ -135,12 +180,13 @@ def send_email(user, password, receptor):
     contexto = ssl.create_default_context()
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=contexto) as smtp:
+        with smtplib.SMTP_SSL("smtp.ionos.com", 465, context=contexto) as smtp:
             smtp.login(EMAIL_EMISOR, EMAIL_CONTRA)
             smtp.sendmail(EMAIL_EMISOR, receptor, em.as_string())
+        print("✅ Correo enviado correctamente.")
         return True
     except Exception as e:
-        print(f"Error al enviar el correo: {e}")
+        print(f"⚠️ Error al enviar el correo: {e}")
         return False
 
 # Añadir empleados (Admin) 
@@ -173,6 +219,12 @@ def añadir_empleados():
             if not isinstance(horarios, list) or len(horarios) == 0:
                 raise ValueError("⚠️ La lista de horarios está vacía")
             
+            # Usar la contraseña que envía el formulario (ya con "TEMP_")
+            contrasena_temporal = data.get('contrasena')
+            if not contrasena_temporal:
+                # Si por alguna razón no se envía, la generamos en el servidor
+                contrasena_temporal = generar_contrasena()
+
             with psycopg2.connect(
                 dbname="postgres2",
                 user="postgres",
@@ -196,7 +248,7 @@ def añadir_empleados():
                         data['departamento'],
                         data['fecha_contratacion'],
                         data['usuario'],
-                        data['contrasena']
+                        contrasena_temporal
                     ))
                     id_uem = cur.fetchone()[0]
 
@@ -210,13 +262,13 @@ def añadir_empleados():
                             id_uem,
                             horario['horario_entrada'],
                             horario['horario_salida'],
-                            Json(horario['dias'])
+                            psycopg2.extras.Json(horario['dias'])
                         ))
                     
                     conn.commit()
 
-            # Enviar correo con las credenciales
-            if send_email(data['usuario'], data['contrasena'], data['email']):
+            # Enviar correo con las credenciales temporales
+            if send_email(data['usuario'], contrasena_temporal, data['email']):
                 return jsonify({'success': True, 'message': 'Empleado agregado y correo enviado correctamente'})
             else:
                 return jsonify({'success': True, 'message': 'Empleado agregado, pero hubo un error al enviar el correo'})
@@ -272,10 +324,19 @@ def añadir_empleados():
         print(f"Error: {str(e)}")
         return render_template('Admin/añadir_empleados.html', error=str(e))
 
+
 #Sistema de asistencias (Admin) 
 @app.route('/asistencias')
 def asistencias():
     return render_template('Admin/asistencias.html')
+
+def get_db_connection():
+    return psycopg2.connect(
+        host='localhost',
+        database='postgres2',
+        user='postgres',
+        password='024689'
+    )
 
 # Ruta para historial de empleados (Admin)
 @app.route('/historial_empleados_admin')
@@ -283,23 +344,25 @@ def historial_empleados_admin():
     if not session.get('es_admin'):
         return redirect(url_for('login'))
 
-    conn = None
-    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Obtener lista de empleados para el dropdown
-        cur.execute("SELECT id_uem, nombre_completo FROM colaboradores ORDER BY nombre_completo")
-        empleados = cur.fetchall()
-
-        # Obtener filtros seleccionados
+        # Obtener parámetros de filtrado
         filter_ids = request.args.get('filter_ids', '')
-        # En la ruta /historial_empleados_admin
-        selected_ids = [int(id) for id in filter_ids.split(',') if id]  # Filtrar IDs vacíos  # Convertir a enteros
+        filter_types = request.args.get('filter_types', '')
+        filter_status = request.args.get('filter_status', '')
+
+        selected_ids = [int(id) for id in filter_ids.split(',') if id]
+        selected_types = [tipo.strip().upper() for tipo in filter_types.split(',') if tipo]
+        selected_status = [estado.strip().upper() for estado in filter_status.split(',') if estado]
+
+        # Listas fijas de valores permitidos
+        TIPOS_PERMITIDOS = ['PERMISO', 'INCAPACIDAD', 'VACACIONES']
+        ESTADOS_PERMITIDOS = ['PENDIENTE', 'VALIDADO', 'RECHAZADO']
 
         # Construir consulta base
-        query = """
+        base_query = """
             SELECT 
                 to_char(s.fecha_inicio, 'TMMonth YYYY') AS mes_anio,
                 s.fecha_inicio,
@@ -318,48 +381,74 @@ def historial_empleados_admin():
             JOIN colaboradores c ON s.id_uem = c.id_uem
             LEFT JOIN permisos p ON s.id = p.solicitud_id
             LEFT JOIN incapacidades i ON s.id = i.solicitud_id
+            WHERE 1=1
         """
 
-        # Añadir condición de filtro si hay IDs seleccionados
         params = []
+        conditions = []
+
+        # Filtro por usuarios
         if selected_ids:
-            query += " WHERE c.id_uem = ANY(%s)"
+            conditions.append("c.id_uem = ANY(%s)")
             params.append(selected_ids)
+        
+        # Filtro por tipos (solo permitidos)
+        selected_types = [t for t in selected_types if t in TIPOS_PERMITIDOS]
+        if selected_types:
+            conditions.append("s.tipo = ANY(%s)")
+            params.append(selected_types)
+        
+        # Filtro por estados (solo permitidos)
+        selected_status = [e for e in selected_status if e in ESTADOS_PERMITIDOS]
+        if selected_status:
+            conditions.append("s.estado = ANY(%s)")
+            params.append(selected_status)
 
-        query += " ORDER BY s.fecha_inicio DESC"
+        # Construir query final
+        final_query = base_query
+        if conditions:
+            final_query += " AND " + " AND ".join(conditions)
+        final_query += " ORDER BY s.fecha_inicio DESC"
 
-        cur.execute(query, params if selected_ids else None)
+        # Obtener datos filtrados
+        cur.execute(final_query, params)
         solicitudes = cur.fetchall()
 
-        solicitudes_list = []
-        for row in solicitudes:
-            solicitudes_list.append({
-                "mes_anio": row[0],
-                "fecha_inicio": row[1].strftime("%d/%m/%Y") if row[1] else "",
-                "fecha_fin": row[2].strftime("%d/%m/%Y") if row[2] else "",
-                "dias_totales": row[3],
-                "tipo": row[4],
-                "estado": row[5],
-                "descripcion": row[6],
-                "nombre_usuario": row[7]
-            })
+        # Obtener datos para filtros
+        cur.execute("SELECT id_uem, nombre_completo FROM colaboradores ORDER BY nombre_completo")
+        empleados = cur.fetchall()
 
-        return render_template("Admin/historial_empleados_admin.html", 
-                            solicitudes=solicitudes_list,
-                            empleados=empleados,
-                            selected_ids=selected_ids)
+        tipos = TIPOS_PERMITIDOS  # Solo tipos permitidos
+        estados = ESTADOS_PERMITIDOS  # Solo estados permitidos
+
+        # Procesar resultados
+        solicitudes_list = [{
+            "mes_anio": row[0],
+            "fecha_inicio": row[1].strftime("%d/%m/%Y") if row[1] else "",
+            "fecha_fin": row[2].strftime("%d/%m/%Y") if row[2] else "",
+            "dias_totales": row[3],
+            "tipo": row[4],
+            "estado": row[5],
+            "descripcion": row[6],
+            "nombre_usuario": row[7]
+        } for row in solicitudes]
+
+        return render_template("Admin/historial_empleados_admin.html",
+            solicitudes=solicitudes_list,
+            empleados=empleados,
+            tipos=tipos,
+            estados=estados,
+            selected_ids=selected_ids,
+            selected_types=selected_types,
+            selected_status=selected_status
+        )
 
     except Exception as e:
-        print(f"Error en historial_empleados_admin: {str(e)}")
         return f"Error: {str(e)}"
     finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
 
-#Botón para generar credenciales (Admin) 
-def generar_contrasena(longitud=12):
-    caracteres = string.ascii_letters + string.digits + string.punctuation
-    return ''.join(random.choice(caracteres) for _ in range(longitud))
 
 @app.route('/generar_contrasena')
 def generar():
@@ -566,24 +655,14 @@ def actualizar_colaborador(id_uem):
         print("Error en actualizar_colaborador:", str(e))
         return jsonify({'success': False, 'error': str(e)}), 500
 
-#Página principal del usuario
+# Proteger dashboard
 @app.route('/dashboard_empleados')
 def dashboard_empleados():
-    if 'usuario' in session and not session.get('es_admin'):
-        return render_template('Empleados/dashboard_empleados.html', nombre=session['usuario'])
-    return redirect(url_for('login'))
-
-# Historial para el usuario
-def get_db_connection():
-    conn = psycopg2.connect(
-        host='localhost',
-        database='postgres2',
-        user='postgres',
-        password='024689'
-    )
-    return conn
-
-from datetime import datetime
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    if session.get('password_temp'):
+        return redirect(url_for('cambiar_contraseña'))
+    return render_template('Empleados/dashboard_empleados.html', nombre=session['usuario'])
 
 @app.route('/pedirvacaciones', methods=['GET'])
 def pedirvacaciones():
@@ -648,13 +727,34 @@ def solicitar_permiso():
         flash('La fecha de fin no puede ser anterior a la de inicio.')
         return redirect(url_for('dashboard_empleados'))
 
+   # Dentro de la función solicitar_permiso()
+# Dentro de la ruta /solicitar_permiso
+    # Dentro de la ruta /solicitar_permiso
     if tipo in ['PERMISO', 'INCAPACIDAD']:
+        # Validar que haya comentario
         if not comentario:
             flash('Debes escribir un comentario.')
             return redirect(url_for('dashboard_empleados'))
+
+        # Validar que haya archivo adjunto
         if not archivo or archivo.filename == '':
             flash('Debes subir un justificante.')
             return redirect(url_for('dashboard_empleados'))
+
+        # Validar tipo MIME y extensión
+        mime_permitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
+        extensiones_permitidas = {'jpg', 'jpeg', 'png', 'pdf'}
+
+        # Obtener extensión del archivo
+        filename = archivo.filename.lower()
+        extension = filename.rsplit('.', 1)[1] if '.' in filename else ''
+        mime_type = archivo.mimetype  # Obtener el tipo MIME
+
+        if mime_type not in mime_permitidos or extension not in extensiones_permitidas:
+            flash('❌ Formato no válido. Solo se aceptan JPEG, PNG o PDF.')
+            return redirect(url_for('dashboard_empleados'))
+
+
 
     conn = None
     cur = None
@@ -728,6 +828,36 @@ def solicitar_permiso():
             cur.close()
         if conn:
             conn.close()
+
+@app.route('/verestatus_solicitudes')
+def veresverestatus_solicitudestatus():
+    id_uem = session.get('id_uem')
+    if not id_uem:
+        return jsonify({"error": "No autorizado"}), 401
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT tipo, estado
+            FROM solicitudes
+            WHERE id_uem = %s
+        """, (id_uem,))
+        
+        solicitudes = []
+        for row in cur.fetchall():
+            solicitudes.append({
+                "tipo": row[0].strip().upper(),
+                "estado": row[1]
+            })
+            
+        return jsonify(solicitudes)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
 
 @app.route('/historial_empleados')
 def historial_empleados():
@@ -803,10 +933,10 @@ def verestatus():
         solicitudes = cur.fetchall()
         solicitudes_list = []
         for row in solicitudes:
-            # Formatea la fecha creado_en (si es necesario)
-            fecha_formateada = row[0].strftime("%d/%m/%Y")  # Formato: dd/mm/yyyy
+            # Formatea la fecha creado_en incluyendo la hora
+            fecha_formateada = row[0].strftime("%d/%m/%Y %H:%M:%S")  # Formato: dd/mm/yyyy HH:MM:SS
             solicitudes_list.append({
-                "creado_en": fecha_formateada,  # Usa la fecha formateada
+                "creado_en": fecha_formateada,  # Usa la fecha y hora formateada
                 "tipo": row[1].strip().upper(),  # Tipo de solicitud
                 "estado": row[2]  # Estado de la solicitud
             })
@@ -818,6 +948,349 @@ def verestatus():
             cur.close()
         if conn:
             conn.close()
+
+@app.route('/descargar_historial')
+def descargar_historial():
+    if 'usuario' not in session or session.get('es_admin'):
+        return redirect(url_for('login'))
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # 1. Obtener datos del usuario
+        cur.execute("SELECT nombre_completo, departamento FROM colaboradores WHERE id_uem = %s", (session['id_uem'],))
+        usuario = cur.fetchone()
+        
+        # 2. Obtener historial (sin estado)
+        cur.execute("""
+            SELECT 
+                to_char(s.fecha_inicio, 'DD/MM/YYYY') AS fecha_inicio,
+                to_char(s.fecha_fin, 'DD/MM/YYYY') AS fecha_fin,
+                ((s.fecha_fin - s.fecha_inicio) + 1) AS dias_totales,
+                s.tipo,
+                COALESCE(p.comentario, i.comentario, '---') AS descripcion
+            FROM solicitudes s
+            LEFT JOIN permisos p ON s.id = p.solicitud_id
+            LEFT JOIN incapacidades i ON s.id = i.solicitud_id
+            WHERE s.id_uem = %s
+            ORDER BY s.fecha_inicio DESC
+        """, (session['id_uem'],))
+        
+        # DataFrames
+        df_info = pd.DataFrame({
+            '': ['NOMBRE', 'DEPARTAMENTO', 'FECHA DE DESCARGA'],
+            'Datos': [usuario[0], usuario[1], datetime.now().strftime("%d/%m/%Y")]
+        })
+
+        df_historial = pd.DataFrame(cur.fetchall(), 
+            columns=['FECHA INICIO', 'FECHA FIN', 'DÍAS', 'TIPO', 'DESCRIPCIÓN'])  # ✅ Sin "Estado"
+
+        # Generar Excel
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # Información
+            df_info.to_excel(writer, index=False, startrow=2, header=False)
+            
+            # Historial
+            df_historial.to_excel(writer, index=False, startrow=7)
+            
+            # Formato
+            workbook = writer.book
+            worksheet = writer.sheets['Sheet1']
+            
+            # Títulos
+            title_format = workbook.add_format({
+                'bold': True,
+                'font_size': 14,
+                'bg_color': '#2F75B5',
+                'font_color': 'white',
+                'align': 'center',
+                'border': 1
+            })
+            
+            # Encabezados
+            header_format = workbook.add_format({
+                'bold': True,
+                'bg_color': '#D9E1F2',
+                'border': 1,
+                'align': 'center'
+            })
+            
+            # Aplicar formatos
+            worksheet.merge_range('A2:B2', 'INFORMACIÓN DEL USUARIO', title_format)
+            worksheet.merge_range('A7:E7', 'HISTORIAL DE SOLICITUDES', title_format)
+            
+            for col_num, value in enumerate(df_historial.columns.values):
+                worksheet.write(7, col_num, value, header_format)
+            
+            # Ajustar columnas
+            column_widths = {
+                'A': 18,  # Campo
+                'B': 30,  # Valor
+                'C': 12,  # Fecha inicio
+                'D': 12,  # Fecha fin
+                'E': 8,   # Días
+                'F': 15   # Descripción
+            }
+            
+            for col, width in column_widths.items():
+                worksheet.set_column(f'{col}:{col}', width)
+
+        output.seek(0)
+        filename = f"Tu_Historial_Padi_{datetime.now().strftime('%d_%m_%Y')}.xlsx"
+        return send_file(output, 
+                        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        download_name=filename,
+                        as_attachment=True)
+
+    except Exception as e:
+        print(f"Error al generar Excel: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
+
+@app.route('/descargar_historial_admin')
+def descargar_historial_admin():
+    if 'usuario' not in session or not session.get('es_admin'):
+        return redirect(url_for('login'))
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # main.py (Ruta /descargar_historial_admin)
+# main.py (Ruta /descargar_historial_admin)
+# main.py (Ruta /descargar_historial_admin)
+        cur.execute("""
+            SELECT 
+                c.nombre_completo,
+                c.departamento,
+                TO_CHAR(s.fecha_inicio, 'DD/MM/YYYY') AS inicio,
+                TO_CHAR(s.fecha_fin, 'DD/MM/YYYY') AS fin,
+                (s.fecha_fin - s.fecha_inicio + 1) AS dias,
+                s.tipo,
+                s.estado,
+                COALESCE(p.comentario, i.comentario, '---') AS detalle,
+                TO_CHAR(s.creado_en, 'DD/MM/YYYY') AS fecha_peticion  -- ✅ Fecha completa
+            FROM solicitudes s
+            JOIN colaboradores c ON s.id_uem = c.id_uem
+            LEFT JOIN permisos p ON s.id = p.solicitud_id
+            LEFT JOIN incapacidades i ON s.id = i.solicitud_id
+            ORDER BY s.creado_en DESC  -- Ordenar por fecha de creación
+        """)
+        
+        # 2. Crear DataFrame estructurado
+        df = pd.DataFrame(cur.fetchall(), 
+        columns=['COLABORADOR', 'DEPARTAMENTO', 'INICIO', 'FIN', 
+             'DÍAS', 'TIPO', 'ESTADO', 'DETALLE', 'FECHA DE PETICIÓN'])  # ✅ Nuevo nombre
+
+        # 3. Generar Excel profesional
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Historial General', index=False)
+            
+            workbook = writer.book
+            worksheet = writer.sheets['Historial General']
+            
+            # Formato profesional
+            header_format = workbook.add_format({
+                'bold': True,
+                'bg_color': '#2F75B5',  # Azul corporativo
+                'font_color': 'white',
+                'border': 1,
+                'align': 'center'
+            })
+            
+            date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
+            
+            # Aplicar formatos
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+                
+            # Ajustar anchos
+            column_widths = {
+                'A': 25,  # Colaborador
+                'B': 20,  # Departamento
+                'C': 12,  # Inicio
+                'D': 12,  # Fin
+                'E': 8,   # Días
+                'F': 15,  # Tipo
+                'G': 15,  # Estado
+                'H': 40,  # Detalle
+                'I': 15   # FECHA DE PETICIÓN (nuevo ancho)
+            }
+            for col, width in column_widths.items():
+                worksheet.set_column(f'{col}:{col}', width)
+
+        output.seek(0)
+        filename = f"Historial_General_{datetime.now().strftime('%d-%m-%Y')}.xlsx"
+        return send_file(output, 
+                        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        download_name=filename,
+                        as_attachment=True)
+
+    except Exception as e:
+        print(f"Error al generar Excel: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
+
+# Modificar ruta de cambio de contraseña
+@app.route('/cambiarContraseña', methods=['GET', 'POST'])
+def cambiar_contraseña():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        conn = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cur = conn.cursor()
+        
+        if request.method == 'POST':
+            nueva = request.form['contrasena']
+            confirmacion = request.form['confirmar_contrasena']
+            
+            # Validación de coincidencia y formato
+            if nueva != confirmacion:
+                flash('Las contraseñas no coinciden')
+                return redirect(url_for('cambiar_contraseña'))
+            if nueva.startswith('TEMP_'):
+                flash('No puedes usar formato temporal')
+                return redirect(url_for('cambiar_contraseña'))
+            
+            # Actualizar en BD según si es admin o colaborador
+            tabla = 'USUARIO' if session.get('es_admin') else 'colaboradores'
+            columna_id = 'id_usuario' if session.get('es_admin') else 'id_uem'
+            
+            cur.execute(
+                f"UPDATE {tabla} SET contrasena = %s WHERE {columna_id} = %s",
+                (nueva, session['id_uem'])
+            )
+            conn.commit()
+            
+            # Se limpia la sesión para que el usuario vuelva a loguearse con la nueva contraseña
+            session.clear()  # Elimina toda la sesión
+            flash('Contraseña actualizada. Inicia sesión de nuevo')
+            return redirect(url_for('login'))
+                    
+        return render_template('cambiarContraseña.html')
+        
+    except Exception as e:
+        print(f"Error en cambiar_contraseña: {str(e)}")
+        flash('Error al actualizar')
+        return redirect(url_for('cambiar_contraseña'))
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
+
+@app.route('/descargar_usuarios')
+def descargar_usuarios():
+    # Verifica si el usuario está autenticado y es admin
+    if 'usuario' not in session or not session.get('es_admin'):
+        return redirect(url_for('login'))
+    
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Consulta SQL que une los horarios (hora entrada, hora salida y días de trabajo) 
+        # y los consolida con salto de línea para cada usuario
+        cur.execute("""
+            SELECT 
+                c.id_uem,
+                c.nombre_completo,
+                TO_CHAR(c.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento,
+                c.direccion,
+                c.telefono,
+                c.email,
+                c.departamento,
+                TO_CHAR(c.fecha_contratacion, 'DD/MM/YYYY') AS fecha_contratacion,
+                c.usuario,
+                STRING_AGG(TO_CHAR(h.horario_entrada, 'HH24:MI'), '\n') AS horario_entrada,
+                STRING_AGG(TO_CHAR(h.horario_salida, 'HH24:MI'), '\n') AS horario_salida,
+                STRING_AGG(
+                    (SELECT STRING_AGG(value::TEXT, ', ') 
+                     FROM jsonb_array_elements_text(h.dias_trabajo)), 
+                    '\n'
+                ) AS dias_trabajo
+            FROM colaboradores c
+            LEFT JOIN horarios h ON c.id_uem = h.id_uem_fk
+            GROUP BY c.id_uem
+            ORDER BY c.nombre_completo
+        """)
+        
+        # Definición de las columnas para el DataFrame
+        columns = [
+            'ID', 'Nombre', 'Fecha Nacimiento', 'Dirección', 'Teléfono', 
+            'Email', 'Departamento', 'Fecha Contratación', 'Usuario', 
+            'Hora Entrada', 'Hora Salida', 'Días Trabajo'
+        ]
+        df = pd.DataFrame(cur.fetchall(), columns=columns)
+        
+        # Generar Excel con formato usando xlsxwriter
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Usuarios')
+            
+            workbook = writer.book
+            worksheet = writer.sheets['Usuarios']
+            
+            # Formato para celdas que necesiten ajuste de texto
+            wrap_format = workbook.add_format({'text_wrap': True})
+            
+            # Formato para encabezados
+            header_format = workbook.add_format({
+                'bold': True,
+                'bg_color': '#2F75B5',
+                'font_color': 'white',
+                'border': 1,
+                'align': 'center'
+            })
+            
+            # Escribir encabezados con el formato definido
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+            
+            # Definir el ancho de cada columna (usando letras de Excel)
+            column_widths = {
+                'A': 8,    # ID
+                'B': 30,   # Nombre
+                'C': 15,   # Fecha Nacimiento
+                'D': 30,   # Dirección
+                'E': 12,   # Teléfono
+                'F': 25,   # Email
+                'G': 20,   # Departamento
+                'H': 18,   # Fecha Contratación
+                'I': 15,   # Usuario
+                'J': 12,   # Hora Entrada
+                'K': 12,   # Hora Salida
+                'L': 25    # Días Trabajo
+            }
+            
+            for col, width in column_widths.items():
+                worksheet.set_column(f'{col}:{col}', width, wrap_format)
+        
+        output.seek(0)
+        filename = f"Lista_Usuarios_{datetime.now().strftime('%d-%m-%Y')}.xlsx"
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            download_name=filename,
+            as_attachment=True
+        )
+    
+    except Exception as e:
+        print(f"Error al generar Excel: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()      
 
 
 if __name__ == '__main__':

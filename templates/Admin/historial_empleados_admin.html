@@ -50,55 +50,73 @@
         <br><br>
         <h4>Historial de permisos y vacaciones</h4>
         <br>
+        <!-- Filtros -->
         <div class="content-button">
+            <!-- Filtro Usuarios -->
             <div class="dropdown">
-                <button onclick="toggleDropdown()" class="dropbtn">
+                <button onclick="toggleDropdown('usuarios')" class="dropbtn">
                     Filtrar usuarios <i class="fa-solid fa-angle-down"></i>
                 </button>
-                <div id="dropdownMenu" class="dropdown-content">
+                <div id="usuarios" class="dropdown-content">
                     {% for empleado in empleados %}
-                    <label>
+                    <label class="filter-item">
                         <input type="checkbox" class="empleado-checkbox" 
-                               value="{{ empleado[0] }}" 
-                               {% if empleado[0]|int in selected_ids %}checked{% endif %}>
+                            value="{{ empleado[0] }}" 
+                            {% if empleado[0] in selected_ids %}checked{% endif %}>
                         {{ empleado[1] }}
                     </label>
                     {% endfor %}
                 </div>
             </div>
-
+            <!-- Filtro Tipos -->
             <div class="dropdown">
-                <button onclick="toggleDropdown()" class="dropbtn2">
+                <button onclick="toggleDropdown('tipos')" class="dropbtn2">
                     Filtrar por tipo <i class="fa-solid fa-angle-down"></i>
                 </button>
-                <div id="dropdownMenu" class="dropdown-content2">
-                    {% for empleado in empleados %}
-                    <label>
-                        <input type="checkbox" class="empleado-checkbox" 
-                               value="{{ empleado[0] }}" 
-                               {% if empleado[0]|int in selected_ids %}checked{% endif %}>
-                        {{ empleado[1] }}
+                <div id="tipos" class="dropdown-content2">
+                    <label class="filter-item">
+                        <input type="checkbox" class="tipo-checkbox" value="PERMISO" 
+                            {% if 'PERMISO' in selected_types %}checked{% endif %}>
+                        PERMISO
                     </label>
-                    {% endfor %}
+                    <label class="filter-item">
+                        <input type="checkbox" class="tipo-checkbox" value="INCAPACIDAD" 
+                            {% if 'INCAPACIDAD' in selected_types %}checked{% endif %}>
+                        INCAPACIDAD
+                    </label>
+                    <label class="filter-item">
+                        <input type="checkbox" class="tipo-checkbox" value="VACACIONES" 
+                            {% if 'VACACIONES' in selected_types %}checked{% endif %}>
+                        VACACIONES
+                    </label>
                 </div>
             </div>
 
+            <!-- Filtro Estados -->
             <div class="dropdown">
-                <button onclick="toggleDropdown()" class="dropbtn3">
-                    Filtrar por tipo <i class="fa-solid fa-angle-down"></i>
+                <button onclick="toggleDropdown('estados')" class="dropbtn3">
+                    Filtrar por estado <i class="fa-solid fa-angle-down"></i>
                 </button>
-                <div id="dropdownMenu" class="dropdown-content3">
-                    {% for empleado in empleados %}
-                    <label>
-                        <input type="checkbox" class="empleado-checkbox" 
-                               value="{{ empleado[0] }}" 
-                               {% if empleado[0]|int in selected_ids %}checked{% endif %}>
-                        {{ empleado[1] }}
+                <div id="estados" class="dropdown-content3">
+                    <label class="filter-item">
+                        <input type="checkbox" class="estado-checkbox" value="PENDIENTE" 
+                            {% if 'PENDIENTE' in selected_status %}checked{% endif %}>
+                        PENDIENTE
                     </label>
-                    {% endfor %}
+                    <label class="filter-item">
+                        <input type="checkbox" class="estado-checkbox" value="VALIDADO" 
+                            {% if 'VALIDADO' in selected_status %}checked{% endif %}>
+                        VALIDADO
+                    </label>
+                    <label class="filter-item">
+                        <input type="checkbox" class="estado-checkbox" value="RECHAZADO" 
+                            {% if 'RECHAZADO' in selected_status %}checked{% endif %}>
+                        RECHAZADO
+                    </label>
                 </div>
             </div>
         </div>
+        
         <!-- Contenido del dashboard -->
         <div class="content2">
             <!-- Contenedor de la tabla -->
@@ -134,7 +152,7 @@
                 </table>
                 <br>
                 <div style="display: flex; justify-content: flex-end;">
-                    <button class="btn-descargar">
+                    <button class="btn-descargar" onclick="descargarHistorialAdmin()">
                         Descargar <i class="fa-solid fa-download"></i>
                     </button>
                 </div>

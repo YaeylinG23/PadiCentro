@@ -265,4 +265,6 @@ function abrirModalEditar(id_uem) {
       alert("Error al obtener datos del colaborador.");
     });
 }
-
+function descargarUsuarios() {
+  window.location.href = "/descargar_usuarios";
+}

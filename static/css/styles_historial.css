@@ -520,8 +520,6 @@ h5{
 p{
     margin-top: 0px;
     margin-bottom: 0rem;
-    font-size: 18px;
-    font-weight: bold;
     color: black;
 }
 
@@ -559,4 +557,191 @@ p{
     border: none;
     border-radius: 50px;
     cursor: pointer;
+}
+/* Estilos para el modal de validación */
+.modal4 {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content4 {
+    background: white;
+    border: 6px solid #F9D007;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    width: 450px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Cambiar el color del borde al enfocar un campo de entrada */
+.form-input:focus {
+    border-color: #F9D007; /* Cambia el color del borde a amarillo */
+    outline: none; /* Elimina el borde predeterminado que algunos navegadores agregan al enfocar */
+}
+
+/* Resto de los estilos (sin cambios) */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group .fecha-lista {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-group .fecha-lista label {
+    margin-right: 10px;
+}
+
+.form-group .fecha-lista span {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color: #555;
+}
+
+.form-input2 {
+    background-color: #f9f9f9;
+    color: #555;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    display: block;
+}
+
+.form-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.btn-abrir,
+.btn-modal {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-abrir {
+    background-color: #014CB9;
+    color: white;
+}
+
+.btn-abrir:hover {
+    background-color: #013a7d;
+}
+
+.btn-modal {
+    margin: 5px;
+}
+
+/* Botón Aceptar más grande y centrado */
+.btn-aceptar {
+    background-color: #4DAD33;
+    color: white;
+    padding: 15px 30px; /* Aumentar el tamaño del botón */
+    font-size: 16px; /* Aumentar el tamaño de la fuente */
+    font-weight: bold; /* Hacer el texto más grueso */
+    margin: 10px auto; /* Centrar el botón */
+    display: block; /* Para que ocupe toda la línea y se centre */
+}
+
+.btn-aceptar:hover {
+    background-color: #3d8c27;
+}
+
+/* Botón Rechazar más grande y centrado */
+.btn-rechazar {
+    background-color: #ff4b5c;
+    color: white;
+    padding: 15px 30px; /* Aumentar el tamaño del botón */
+    font-size: 16px; /* Aumentar el tamaño de la fuente */
+    font-weight: bold; /* Hacer el texto más grueso */
+    margin: 10px auto; /* Centrar el botón */
+    display: block; /* Para que ocupe toda la línea y se centre */
+}
+
+.btn-rechazar:hover {
+    background-color: #e63e50;
+}
+
+.btn-cerrar {
+    background-color: #ccc;
+    color: black;
+}
+
+.btn-cerrar:hover {
+    background-color: #bbb;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center; /* Centrar los botones horizontalmente */
+    margin-top: 20px;
+    gap: 10px; /* Espacio entre los botones */
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+}
+
+.close:hover {
+    color: #000;
+}
+
+td i {
+    cursor: pointer; /* Cambia el cursor a una mano al pasar sobre los íconos */
+    font-size: 20px; /* Tamaño de los íconos */
+    margin: 0 5px; /* Espacio entre los íconos */
+    transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+    opacity: 1 !important; 
+}
+
+.btn-validar {
+    color: #014CB9 !important;  /* Color azul */
+}
+
+
+/* Efecto al pasar el mouse sobre los íconos */
+td i:hover {
+    transform: scale(1.2); /* Aumenta ligeramente el tamaño */
 }

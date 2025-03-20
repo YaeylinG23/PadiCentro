@@ -104,9 +104,9 @@
                         PENDIENTE
                     </label>
                     <label class="filter-item">
-                        <input type="checkbox" class="estado-checkbox" value="VALIDADO" 
-                            {% if 'VALIDADO' in selected_status %}checked{% endif %}>
-                        VALIDADO
+                        <input type="checkbox" class="estado-checkbox" value="APROBADO" 
+                            {% if 'APROBADO' in selected_status %}checked{% endif %}>
+                        APROBADO
                     </label>
                     <label class="filter-item">
                         <input type="checkbox" class="estado-checkbox" value="RECHAZADO" 
@@ -121,35 +121,45 @@
         <div class="content2">
             <!-- Contenedor de la tabla -->
             <div class="table-wrapper">
+                <!-- Tabla de solicitudes -->
                 <table class="table-custom">
-                    <h5></h5>
                     <thead>
                         <tr>
-                          <th>Mes / Año</th>
-                          <th>Nombre del usuario</th>
-                          <th>Fecha inicio</th>
-                          <th>Fecha final</th>
-                          <th>Días solicitados</th>
-                          <th>Tipo</th>
-                          <th>Descripción</th>
-                          <th>Estado</th>
+                            <th>Mes / Año</th>
+                            <th>Nombre del usuario</th>
+                            <th>Fecha inicio</th>
+                            <th>Fecha final</th>
+                            <th>Días solicitados</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
-                      </thead>
+                    </thead>
                     <tbody>
                         {% for solicitud in solicitudes %}
-                        <tr>
-                          <td>{{ solicitud.mes_anio }}</td>
-                          <td>{{ solicitud.nombre_usuario }}</td>
-                          <td>{{ solicitud.fecha_inicio }}</td>
-                          <td>{{ solicitud.fecha_fin }}</td>
-                          <td>{{ solicitud.dias_totales }}</td>
-                          <td>{{ solicitud.tipo }}</td>
-                          <td>{{ solicitud.descripcion }}</td>
-                          <td>{{ solicitud.estado }}</td>
+                        <tr data-id="{{ solicitud.id }}">
+                            <td>{{ solicitud.fecha_inicio | mes_anio }}</td>
+                            <td>{{ solicitud.nombre_usuario }}</td>
+                            <td>{{ solicitud.fecha_inicio.strftime("%d/%m/%Y") }}</td>
+                            <td>{{ solicitud.fecha_fin.strftime("%d/%m/%Y") }}</td>
+                            <td>{{ (solicitud.fecha_fin - solicitud.fecha_inicio).days + 1 }}</td>
+                            <td>{{ solicitud.tipo }}</td>
+                            <td>{{ solicitud.descripcion }}</td>
+                            <td>{{ solicitud.estado }}</td>
+                            <td>
+                                <i class="fas fa-check-circle btn-validar" 
+                                   data-id="{{ solicitud.id }}" 
+                                   data-tipo="{{ solicitud.tipo }}"
+                                   data-comentario="{{ solicitud.descripcion }}"
+                                   data-inicio="{{ solicitud.fecha_inicio }}"
+                                   data-fin="{{ solicitud.fecha_fin }}">
+                                </i>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table>
+                </table>    
                 <br>
                 <div style="display: flex; justify-content: flex-end;">
                     <button class="btn-descargar" onclick="descargarHistorialAdmin()">
@@ -163,6 +173,73 @@
         <img src="./static/img/decoración.png" class="bottom-left">
         <img src="./static/img/decoración.png" class="bottom-right">
     </div>
+
+    <!-- Modal de validación -->
+    <div id="validationModal" class="modal4" style="display: none;">
+        <div class="modal-content4">
+            <span class="close" onclick="closeValidationModal()">&times;</span>
+            <h5>Validar Solicitud</h5>
+
+            <!-- Tipo de solicitud -->
+            <div class="form-group">
+                <label>Tipo:</label>
+                <div>
+                    <span id="tipoSolicitud" class="form-input2"></span>
+                </div>
+            </div>
+
+            <!-- Fechas -->
+            <div class="form-group">
+                <div class="fecha-lista">
+                    <label>Fecha Inicio:</label>
+                    <span id="fechaInicio" class="form-input2"></span>
+                </div>
+                <div class="fecha-lista">
+                    <label>Fecha Fin:</label>
+                    <span id="fechaFin" class="form-input2"></span>
+                </div>
+            </div>
+
+            <!-- Comentario del empleado -->
+            <div class="form-group">
+                <label>Comentario del empleado:</label>
+                <div>
+                    <p id="comentarioEmpleado" class="form-input2"></p>
+                </div>
+            </div>
+
+            <!-- Botón para ver justificante -->
+            <div class="form-group">
+                <label>Visualizar justificante:</label>
+                <div>
+                    <button class="btn-abrir" onclick="verJustificante()">Abrir</button>
+                </div>
+            </div>
+
+            <!-- Motivo del cambio (oculto inicialmente) -->
+            <div id="motivoContainer" class="form-group" style="display: none;">
+                <label>Motivo del cambio:</label>
+                <div>
+                    <textarea id="comentarioMotivo" class="form-input" rows="3" required></textarea>
+                </div>
+            </div>
+
+            <!-- Comentario de validación -->
+            <div id="comentarioValidacionContainer" class="form-group">
+                <label>Realiza un comentario al usuario:</label>
+                <div>
+                    <textarea id="comentarioValidacion" class="form-input" rows="4" required></textarea>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="button-group">
+                <button type="button" class="btn-modal btn-rechazar" onclick="enviarDecision('RECHAZADO')">Rechazar</button>
+                <button type="button" class="btn-modal btn-aceptar" onclick="enviarDecision('APROBADO')">Aprobar</button>
+            </div>
+        </div>
+    </div>
+
 
     <!--Script para cerrar sesión-->
     <script>

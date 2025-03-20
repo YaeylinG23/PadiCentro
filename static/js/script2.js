@@ -34,6 +34,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Función para obtener la fecha mínima permitida (mañana a medianoche)
+    // Esto evita seleccionar fechas de hoy o del pasado.
+    function obtenerFechaMinima() {
+        const ahora = new Date();
+        const manana = new Date(ahora);
+        manana.setDate(ahora.getDate() + 1);
+        manana.setHours(0, 0, 0, 0); // Establece la hora a medianoche de mañana
+        return manana.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    }
+
+    // Función para validar fechas en tiempo real
+    function validarFechas() {
+        const fechaMin = obtenerFechaMinima();
+        const inicio = new Date(fechaInicio.value);
+        const fin = new Date(fechaFin.value);
+
+        // Validar que la fecha de inicio no sea menor que la mínima permitida (mañana)
+        if (fechaInicio.value && inicio < new Date(fechaMin)) {
+            alert("❌ La fecha de inicio debe ser posterior a la fecha actual.");
+            fechaInicio.value = '';
+        }
+
+        // Validar que la fecha de fin no sea menor que la mínima permitida (mañana)
+        if (fechaFin.value && fin < new Date(fechaMin)) {
+            alert("❌ La fecha de fin debe ser posterior a la fecha actual.");
+            fechaFin.value = '';
+        }
+
+        // Validar que la fecha de fin no sea anterior a la de inicio
+        if (fechaInicio.value && fechaFin.value && fin < inicio) {
+            alert("❌ La fecha de fin no puede ser anterior a la fecha de inicio.");
+            fechaFin.value = "";
+        }
+    }
+
     // Deshabilitar campos para VACACIONES y obtener días disponibles
     document.querySelectorAll('input[name="tipo"]').forEach(radio => {
         radio.addEventListener('change', async (e) => {
@@ -62,15 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fechaInicio.addEventListener('input', validarFechas);
     fechaFin.addEventListener('input', validarFechas);
 
-    function validarFechas() {
-        const inicio = new Date(fechaInicio.value);
-        const fin = new Date(fechaFin.value);
-        if (fechaInicio.value && fechaFin.value && fin < inicio) {
-            alert("La fecha de fin no puede ser anterior a la fecha de inicio.");
-            fechaFin.value = "";
-        }
-    }
-
     // Validación al enviar el formulario
     form.addEventListener("submit", async function (event) {
         const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
@@ -95,8 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const finDate = new Date(fechaFinVal);
         const diasSolicitados = Math.ceil((finDate - inicioDate) / (1000 * 60 * 60 * 24)) + 1;
 
+        // Validar que las fechas sean posteriores a la fecha actual (mínimo mañana)
+        const fechaMinima = new Date(obtenerFechaMinima());
+        if (inicioDate < fechaMinima || finDate < fechaMinima) {
+            alert("⚠️ Las fechas deben ser posteriores a la fecha actual.");
+            event.preventDefault();
+            return;
+        }
+
         if (finDate < inicioDate) {
-            alert("La fecha de fin no puede ser anterior a la fecha de inicio.");
+            alert("❌ La fecha de fin no puede ser anterior a la fecha de inicio.");
             event.preventDefault();
             return;
         }
@@ -123,10 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Validar archivo
             const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
             const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'pdf'];
-            const archivoSubido = archivo.files[0];
-            const extension = archivoSubido.name.split('.').pop().toLowerCase();
+            const archivoSubidoObj = archivo.files[0];
+            const extension = archivoSubidoObj.name.split('.').pop().toLowerCase();
 
-            if (!tiposPermitidos.includes(archivoSubido.type) || !extensionesPermitidas.includes(extension)) {
+            if (!tiposPermitidos.includes(archivoSubidoObj.type) || !extensionesPermitidas.includes(extension)) {
                 alert("❌ Formato no válido. Solo se permiten JPEG, PNG o PDF.");
                 event.preventDefault();
                 return;

@@ -215,16 +215,16 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("Datos recibidos:", data);
-    
+
                     // Ordenar las solicitudes por fecha (de la más reciente a la más antigua)
                     data.sort((a, b) => new Date(b.creado_en) - new Date(a.creado_en));
-    
+
                     const carousel = document.getElementById("carousel");
                     carousel.innerHTML = ""; // Limpia el carrusel antes de agregar nuevos slides
                     data.forEach((solicitud, index) => {
                         const slide = document.createElement("div");
-                        slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`;
-    
+                        slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`; // El primer slide está activo
+
                         // Asignar icono y clase según el estado
                         let icono, claseIcono;
                         switch (solicitud.estado.toLowerCase()) {
@@ -244,32 +244,25 @@
                                 icono = "fa-question"; // Icono por defecto
                                 claseIcono = "default";
                         }
-    
+
                         slide.innerHTML = `
                             <div class="icon2 ${claseIcono}">
                                 <i class="fa-solid ${icono}"></i>
                             </div>                    
                             <h3>${solicitud.tipo}</h3>
                             <p class="status-text">${solicitud.estado}</p>
-                            <small>La paciencia es una virtud</small> <br><br>
-                            <small>Fecha y de solicitud: ${solicitud.creado_en}</small>
+                            <small>Comentario del administrador: ${solicitud.comentario_admin}</small> <br><br>
+                            <small>Fecha de solicitud: ${solicitud.creado_en}</small>
                         `;
                         carousel.appendChild(slide);
                     });
-    
+
                     // Actualiza la lista de slides
                     slides = document.querySelectorAll(".carousel-slide");
-    
-                    // Actualiza la imagen del mapache según el estado de la primera solicitud
-                    const primeraSolicitud = data[0];
-                    const imagenMapache = document.querySelector(".mapache-image");
-                    if (primeraSolicitud) {
-                        const nuevaImagen = new Image();
-                        nuevaImagen.src = `${rutaBaseImagenes}mapache_${primeraSolicitud.estado.toLowerCase()}.png`;
-                        nuevaImagen.onload = () => {
-                            imagenMapache.src = nuevaImagen.src;
-                            imagenMapache.classList.add("loaded"); // Mostrar la imagen
-                        };
+
+                    // Muestra el primer slide y actualiza la imagen del mapache
+                    if (slides.length > 0) {
+                        mostrarSlide(0); // Asegúrate de que el primer slide se muestre correctamente
                     }
                 })
                 .catch(error => console.error('Error al cargar las solicitudes:', error));
@@ -281,10 +274,10 @@
                 slide.classList.remove("active");
                 if (i === index) {
                     slide.classList.add("active");
-    
+
                     // Actualizar la imagen del mapache según el estado del slide actual
                     const estado = slide.querySelector(".status-text").textContent.toLowerCase();
-                    const imagenMapache = document.querySelector(".raccoon-image");
+                    const imagenMapache = document.querySelector(".mapache-image");
                     const nuevaImagen = new Image();
                     nuevaImagen.src = `${rutaBaseImagenes}mapache_${estado}.png`;
                     nuevaImagen.onload = () => {
@@ -303,9 +296,9 @@
             } else {
                 currentSlide = currentSlide + 1;
             }
-            mostrarSlide(currentSlide);
+            mostrarSlide(currentSlide); // Actualizar el slide y la imagen del mapache
         });
-    
+
         document.getElementById("next").addEventListener("click", () => {
             // Flecha derecha: retroceder al slide anterior (más antiguo)
             if (currentSlide === 0) {
@@ -313,7 +306,7 @@
             } else {
                 currentSlide = currentSlide - 1;
             }
-            mostrarSlide(currentSlide);
+            mostrarSlide(currentSlide); // Actualizar el slide y la imagen del mapache
         });
     </script>
 

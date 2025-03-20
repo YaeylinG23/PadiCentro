@@ -1,270 +1,222 @@
-let horarioTemplate; // Declaración global
+// Clonamos el template de horario para usarlo en la edición y creación
+let horarioTemplate = document.querySelector('.horario');
+if (horarioTemplate) {
+  horarioTemplate = horarioTemplate.cloneNode(true);
+}
 
-// Función global para formatear fechas
+// Funciones utilitarias
 function formatDateForInput(dateString) {
   if (!dateString) return "";
   return dateString.includes("T") ? dateString.split("T")[0] : dateString;
 }
 
-// Función global para eliminar registros
-function eliminarRegistro(id_uem) {
-    fetch(`/eliminar_colaborador/${id_uem}`, { method: 'DELETE' })
-        .then(response => {
-            if (!response.ok) throw new Error('Error en la respuesta del servidor');
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                location.reload(); // Recargar solo si la eliminación fue exitosa
-            } else {
-                alert('Error al eliminar: ' + (data.error || 'Desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error de conexión');
-        });
+function calcularHoras(entrada, salida) {
+  const [hEntrada, mEntrada] = entrada.split(':').map(Number);
+  const [hSalida, mSalida] = salida.split(':').map(Number);
+  const minutosEntrada = hEntrada * 60 + mEntrada;
+  const minutosSalida = hSalida * 60 + mSalida;
+  let diferencia = (minutosSalida - minutosEntrada) / 60;
+  if (diferencia < 0) diferencia += 24;
+  return diferencia;
 }
 
+function validarHorarioEnTiempoReal(input) {
+  const horario = input.closest('.horario');
+  const entrada = horario.querySelector('input[name="horario_entrada_campo[]"]').value;
+  const salida = horario.querySelector('input[name="horario_salida_campo[]"]').value;
+  if (!entrada || !salida) return;
+  const horas = calcularHoras(entrada, salida);
+  if (horas < 4 || horas > 8) {
+    alert(`⚠️ Horario no válido. Duración: ${horas.toFixed(2)}h. Debe ser entre 4 y 8 horas.`);
+    input.value = '';
+    input.focus();
+  }
+}
 
+// Funciones de CRUD
+function eliminarRegistro(id_uem) {
+  if (!confirm('¿Estás seguro de eliminar este colaborador?')) return;
+  fetch(`/eliminar_colaborador/${id_uem}`, { method: 'DELETE' })
+    .then(response => {
+      if (!response.ok) throw new Error('Error en la respuesta del servidor');
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) location.reload();
+      else alert('Error al eliminar: ' + (data.error || 'Desconocido'));
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error de conexión');
+    });
+}
+
+// Funciones de filtrado
+function configurarFiltroInstantaneo() {
+  document.querySelectorAll('.empleado-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const selectedIds = Array.from(document.querySelectorAll('.empleado-checkbox:checked'))
+        .map(chk => chk.value);
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const rowId = row.getAttribute('data-id');
+        row.style.display = selectedIds.length === 0 || selectedIds.includes(rowId) ? '' : 'none';
+      });
+    });
+  });
+}
+
+// Funciones de edición
+function abrirModalEditar(id_uem) {
+  fetch(`/obtener_colaborador/${id_uem}`)
+    .then(response => response.json())
+    .then(data => {
+      const colaborador = data.colaborador;
+      const horarios = data.horarios;
+      
+      // Llenar datos del formulario
+      document.getElementById('id_uem').value = colaborador.id_uem;
+      document.getElementById('nombre').value = colaborador.nombre_completo;
+      document.getElementById('nacimiento').value = formatDateForInput(colaborador.fecha_nacimiento);
+      document.getElementById('direccion').value = colaborador.direccion;
+      document.getElementById('telefono').value = colaborador.telefono;
+      document.getElementById('email').value = colaborador.email;
+      document.getElementById('departamento').value = colaborador.departamento;
+      document.getElementById('contratacion').value = formatDateForInput(colaborador.fecha_contratacion);
+      document.getElementById('usuario').value = colaborador.usuario;
+      document.getElementById('contrasena').value = colaborador.contrasena;
+
+      // Configurar horarios
+      const horarioContainer = document.getElementById('horarioContainer');
+      horarioContainer.innerHTML = '';
+      horarios.forEach(horario => {
+        const nuevoHorario = horarioTemplate.cloneNode(true);
+        nuevoHorario.querySelector('.input-entrada').value = horario.horario_entrada;
+        nuevoHorario.querySelector('.input-salida').value = horario.horario_salida;
+        
+        nuevoHorario.querySelectorAll('input[type="time"]').forEach(input => {
+          input.addEventListener('input', () => validarHorarioEnTiempoReal(input));
+        });
+
+        const dias = horario.dias.map(dia => dia.trim().toLowerCase());
+        nuevoHorario.querySelectorAll('.input-horario').forEach(checkbox => {
+          checkbox.checked = dias.includes(checkbox.value.trim().toLowerCase());
+        });
+
+        horarioContainer.appendChild(nuevoHorario);
+      });
+      document.getElementById('myModal').style.display = 'block';
+    })
+    .catch(error => console.error('Error al obtener datos:', error));
+}
+
+// Configuración inicial
 document.addEventListener("DOMContentLoaded", function() {
-  // Obtener referencias para el manejo de horarios
+  configurarFiltroInstantaneo();
+  
+  // Configuración de horarios
   const addHorarioBtn = document.getElementById('addHorario');
   const horarioContainer = document.getElementById('horarioContainer');
-  horarioTemplate = document.querySelector('.horario');
-  
-  // Agregar un nuevo bloque de horario
-  addHorarioBtn.addEventListener('click', function() {
-    const originalHorario = document.querySelector('.horario');
-    const horarioClone = originalHorario.cloneNode(true);
+  const originalHorario = document.querySelector('.horario');
 
-    // Limpiar valores de inputs y checkboxes
-    horarioClone.querySelectorAll('input[type="time"]').forEach(input => input.value = '');
+  if (originalHorario) horarioTemplate = originalHorario.cloneNode(true);
+
+  addHorarioBtn?.addEventListener('click', function() {
+    const horarioClone = horarioTemplate.cloneNode(true);
+    horarioClone.querySelectorAll('input[type="time"]').forEach(input => {
+      input.value = '';
+      input.addEventListener('input', () => validarHorarioEnTiempoReal(input));
+    });
     horarioClone.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-
-    // Agregar botón Eliminar si aún no existe
-    let deleteBtn = horarioClone.querySelector('.btn-delete');
-    if (!deleteBtn) {
-      deleteBtn = document.createElement("button");
+    
+    if (!horarioClone.querySelector('.btn-delete')) {
+      const deleteBtn = document.createElement("button");
       deleteBtn.type = "button";
-      deleteBtn.classList.add("btn-delete");
+      deleteBtn.className = "btn-delete";
       deleteBtn.textContent = "Eliminar";
       horarioClone.appendChild(deleteBtn);
     }
-
     horarioContainer.appendChild(horarioClone);
   });
 
-  // Eliminar un bloque de horario
+  // Delegación de eventos
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-delete')) {
       const horario = e.target.closest('.horario');
       const allHorarios = document.querySelectorAll('.horario');
-      if (allHorarios.length > 1) horario.remove();
-      else alert("⚠️ No puedes eliminar el horario principal.");
+      allHorarios.length > 1 ? horario.remove() : alert("⚠️ No puedes eliminar el horario principal.");
+    }
+    
+    if (e.target.classList.contains('btn-editar')) {
+      const id_uem = e.target.getAttribute('data-id');
+      if (id_uem) abrirModalEditar(id_uem);
     }
   });
 
-  // Restablecer todos los horarios
-  document.getElementById('resetHorario').addEventListener('click', function() {
-    document.querySelectorAll('.horario').forEach((horario, index) => {
-      horario.querySelectorAll('input').forEach(input => {
-        if (input.type === 'time') input.value = '';
-        if (input.type === 'checkbox') input.checked = false;
-      });
-      if (index === 0) {
-        const deleteBtn = horario.querySelector('.btn-delete');
-        if (deleteBtn) deleteBtn.remove();
-      }
-    });
-  });
-
-  // Unificar la validación y el envío del formulario (para agregar o actualizar)
+  // Manejo del formulario
   const form = document.getElementById("empleadoForm");
-  if (form) {
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      let hasErrors = false;
-      const horarios = [];
+  form?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    let hasErrors = false;
+    const horarios = [];
 
-      // Validar cada bloque de horario
-      document.querySelectorAll(".horario").forEach((horario, index) => {
-        const entrada = horario.querySelector("input[name='horario_entrada_campo[]']").value;
-        const salida = horario.querySelector("input[name='horario_salida_campo[]']").value;
-        const dias = Array.from(horario.querySelectorAll("input[name='dias[]']:checked"))
-                          .map(checkbox => checkbox.value);
+    document.querySelectorAll(".horario").forEach((horario, index) => {
+      const entrada = horario.querySelector("input[name='horario_entrada_campo[]']").value;
+      const salida = horario.querySelector("input[name='horario_salida_campo[]']").value;
+      const dias = Array.from(horario.querySelectorAll("input[name='dias[]']:checked"))
+                       .map(checkbox => checkbox.value);
 
-        if (!entrada || !salida || dias.length === 0) {
-          alert(`⚠️ Horario ${index + 1}: Completa todos los campos!`);
-          hasErrors = true;
-          return;
-        }
-
-        horarios.push({ 
-          horario_entrada: entrada, 
-          horario_salida: salida, 
-          dias: dias 
-        });
-      });
-
-      if (hasErrors || horarios.length === 0) {
-        alert("¡Agrega al menos un horario válido!");
-        return;
+      if (!entrada || !salida || !dias.length) {
+        alert(`⚠️ Horario ${index + 1}: Completa todos los campos!`);
+        hasErrors = true;
       }
 
-      // Actualizar el campo oculto (opcional)
-      document.getElementById("horarios_data").value = JSON.stringify(horarios);
-
-      const id_uem = document.querySelector('input[name="id_uem"]').value;
-      const url = id_uem ? `/actualizar_colaborador/${id_uem}` : '/añadir_empleados';
-      const method = id_uem ? 'PUT' : 'POST';
-
-      // Recopilar los datos del formulario
-      const formData = {
-        nombre_completo: document.getElementById('nombre').value,
-        fecha_nacimiento: document.getElementById('nacimiento').value,
-        direccion: document.getElementById('direccion').value,
-        telefono: document.getElementById('telefono').value,
-        email: document.getElementById('email').value,
-        departamento: document.getElementById('departamento').value,
-        fecha_contratacion: document.getElementById('contratacion').value,
-        usuario: document.getElementById('usuario').value,
-        contrasena: document.getElementById('contrasena').value,
-        horarios: horarios
-      };
-
-      if (id_uem) formData.id_uem = id_uem;
-
-      fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('myModal').style.display = 'none';
-          window.location.reload();
-        } else {
-          alert('Error: ' + (data.error || 'Desconocido'));
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    });
-  } else {
-    console.error("❌ El formulario no fue encontrado");
-  }
-
-  // Función que filtra las filas de la tabla
-  function filterTable() {
-    // Obtener los IDs seleccionados de los checkboxes
-    const selectedIds = Array.from(document.querySelectorAll('.empleado-checkbox:checked'))
-                              .map(cb => parseInt(cb.value));
-    console.log("IDs seleccionados:", selectedIds);
-
-    // Recorrer cada fila y mostrarla u ocultarla según corresponda
-    document.querySelectorAll('tbody tr').forEach(row => {
-      const rowId = parseInt(row.dataset.id);
-      if (selectedIds.length === 0 || selectedIds.includes(rowId)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
+      const horas = calcularHoras(entrada, salida);
+      if (horas < 4 || horas > 8) {
+        alert(`⚠️ Horario ${index + 1}: Jornada inválida (${horas.toFixed(2)}h)`);
+        hasErrors = true;
       }
+
+      horarios.push({ horario_entrada: entrada, horario_salida: salida, dias: dias });
     });
-  }
 
-  // Asignar el listener a cada checkbox
-  document.querySelectorAll('.empleado-checkbox').forEach(cb => {
-    cb.addEventListener('change', filterTable);
-  });
+    if (hasErrors || !horarios.length) return alert("¡Agrega al menos un horario válido!");
 
-  // Llamamos a filterTable al cargar la página para que se aplique el estado guardado
-  filterTable();
-});
+    const formData = {
+      id_uem: document.querySelector('input[name="id_uem"]')?.value,
+      nombre_completo: document.getElementById('nombre').value,
+      fecha_nacimiento: document.getElementById('nacimiento').value,
+      direccion: document.getElementById('direccion').value,
+      telefono: document.getElementById('telefono').value,
+      email: document.getElementById('email').value,
+      departamento: document.getElementById('departamento').value,
+      fecha_contratacion: document.getElementById('contratacion').value,
+      usuario: document.getElementById('usuario').value,
+      contrasena: document.getElementById('contrasena').value,
+      horarios: horarios
+    };
 
-// Listener global para botones de editar y eliminar
-document.addEventListener('click', function(e) {
-  const btnEditar = e.target.closest('.btn-editar');
-  if (btnEditar) {
-    const id_uem = btnEditar.getAttribute('data-id');
-    console.log("Botón editar clickeado, id:", id_uem);
-    abrirModalEditar(id_uem);
-  }
-  
-  const btnEliminar = e.target.closest('.btn-eliminar');
-  if (btnEliminar) {
-    const id_uem = btnEliminar.getAttribute('data-id');
-    openDeleteModal(id_uem); // ✅ Ahora solo abre el modal de confirmación
-  }
-});
+    const url = formData.id_uem ? `/actualizar_colaborador/${formData.id_uem}` : '/añadir_empleados';
+    const method = formData.id_uem ? 'PUT' : 'POST';
 
-function abrirModalEditar(id_uem) {
-  console.log("Iniciando edición para id:", id_uem);
-  document.getElementById('myModal').style.display = 'none';
-
-  fetch(`/obtener_colaborador/${id_uem}`)
+    fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
     .then(response => response.json())
     .then(data => {
-      console.log("Respuesta del servidor:", data);
-      if (data.error) {
-        alert("Error al obtener datos del colaborador: " + data.error);
-        return;
+      if (data.success) {
+        document.getElementById('myModal').style.display = 'none';
+        window.location.reload();
+      } else {
+        alert('Error: ' + (data.error || 'Desconocido'));
       }
-      const colaborador = data.colaborador;
-      if (!colaborador || Object.keys(colaborador).length === 0) {
-        alert("No se encontró el colaborador.");
-        return;
-      }
-      
-      // Asignación de valores al formulario del modal
-      document.querySelector('#myModal input[name="nombre_completo"]').value = colaborador.nombre_completo || "";
-      document.querySelector('#myModal input[name="fecha_nacimiento"]').value = formatDateForInput(colaborador.fecha_nacimiento);
-      document.querySelector('#myModal input[name="direccion"]').value = colaborador.direccion || "";
-      document.querySelector('#myModal input[name="telefono"]').value = colaborador.telefono || "";
-      document.querySelector('#myModal input[name="email"]').value = colaborador.email || "";
-      document.querySelector('#myModal input[name="departamento"]').value = colaborador.departamento || "";
-      document.querySelector('#myModal input[name="fecha_contratacion"]').value = formatDateForInput(colaborador.fecha_contratacion);
-      document.querySelector('#myModal input[name="usuario"]').value = colaborador.usuario || "";
-      document.querySelector('#myModal input[name="contrasena"]').value = colaborador.contrasena || "";
-      document.querySelector('#myModal input[name="id_uem"]').value = colaborador.id_uem || "";
-  
-      // Limpiar el contenedor de horarios
-      const container = document.getElementById('horarioContainer');
-      container.innerHTML = '';
-      
-      // Usar la variable global 'horarioTemplate' para clonar la plantilla
-      data.horarios.forEach(horario => {
-        const clone = horarioTemplate.cloneNode(true);
-        clone.querySelector('input[name="horario_entrada_campo[]"]').value = horario.horario_entrada || "";
-        clone.querySelector('input[name="horario_salida_campo[]"]').value = horario.horario_salida || "";
-        
-        if (horario.dias) {
-          horario.dias.forEach(dia => {
-            const checkbox = clone.querySelector(`input[value="${dia}"]`);
-            if (checkbox) checkbox.checked = true;
-          });
-        }
-        
-        // Asegurar que exista el botón de eliminar
-        if (!clone.querySelector('.btn-delete')) {
-          const deleteBtn = document.createElement("button");
-          deleteBtn.type = "button";
-          deleteBtn.textContent = "Eliminar";
-          deleteBtn.classList.add("btn-delete");
-          clone.appendChild(deleteBtn);
-        }
-        
-        container.appendChild(clone);
-      });
-  
-      // Mostrar el modal con los datos cargados
-      document.getElementById('myModal').style.display = 'block';
     })
-    .catch(error => {
-      console.error("Error al obtener colaborador:", error);
-      alert("Error al obtener datos del colaborador.");
-    });
-}
+    .catch(error => console.error('Error:', error));
+  });
+});
+
+// Funciones adicionales
 function descargarUsuarios() {
   window.location.href = "/descargar_usuarios";
 }

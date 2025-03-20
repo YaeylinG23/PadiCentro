@@ -18,6 +18,9 @@ from datetime import datetime, timedelta, date, time
 import holidays
 from dateutil.relativedelta import relativedelta
 from io import BytesIO
+import base64
+import locale
+locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8') 
 
 
 app = Flask(__name__)
@@ -348,34 +351,29 @@ def historial_empleados_admin():
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Obtener parámetros de filtrado
+        # Obtener parámetros de filtrado desde la URL
         filter_ids = request.args.get('filter_ids', '')
         filter_types = request.args.get('filter_types', '')
         filter_status = request.args.get('filter_status', '')
 
-        selected_ids = [int(id) for id in filter_ids.split(',') if id]
-        selected_types = [tipo.strip().upper() for tipo in filter_types.split(',') if tipo]
-        selected_status = [estado.strip().upper() for estado in filter_status.split(',') if estado]
+        # Procesar los filtros recibidos: convertimos a enteros y mayúsculas cuando sea necesario
+        selected_ids = [int(x) for x in filter_ids.split(',') if x.strip().isdigit()]
+        selected_types = [t.strip().upper() for t in filter_types.split(',') if t.strip()]
+        selected_status = [e.strip().upper() for e in filter_status.split(',') if e.strip()]
 
         # Listas fijas de valores permitidos
         TIPOS_PERMITIDOS = ['PERMISO', 'INCAPACIDAD', 'VACACIONES']
-        ESTADOS_PERMITIDOS = ['PENDIENTE', 'VALIDADO', 'RECHAZADO']
+        ESTADOS_PERMITIDOS = ['PENDIENTE', 'APROBADO', 'RECHAZADO']
 
-        # Construir consulta base
+        # Consulta base
         base_query = """
             SELECT 
-                to_char(s.fecha_inicio, 'TMMonth YYYY') AS mes_anio,
+                s.id,
                 s.fecha_inicio,
                 s.fecha_fin,
-                ((s.fecha_fin - s.fecha_inicio) + 1) AS dias_totales,
                 s.tipo,
                 s.estado,
-                CASE 
-                    WHEN s.tipo = 'VACACIONES' THEN '---'
-                    WHEN s.tipo = 'PERMISO' THEN p.comentario
-                    WHEN s.tipo = 'INCAPACIDAD' THEN i.comentario
-                    ELSE '---'
-                END AS descripcion,
+                COALESCE(p.comentario, i.comentario, '---') AS descripcion,
                 c.nombre_completo AS nombre_usuario
             FROM solicitudes s
             JOIN colaboradores c ON s.id_uem = c.id_uem
@@ -387,67 +385,68 @@ def historial_empleados_admin():
         params = []
         conditions = []
 
-        # Filtro por usuarios
+        # Filtro por usuarios: convertimos la lista a una tupla y usamos IN
         if selected_ids:
-            conditions.append("c.id_uem = ANY(%s)")
-            params.append(selected_ids)
-        
-        # Filtro por tipos (solo permitidos)
+            conditions.append("c.id_uem IN %s")
+            params.append(tuple(selected_ids))
+
+        # Filtro por tipos: mantenemos el filtro usando ANY para el arreglo de texto
         selected_types = [t for t in selected_types if t in TIPOS_PERMITIDOS]
         if selected_types:
-            conditions.append("s.tipo = ANY(%s)")
+            conditions.append("s.tipo = ANY(%s::text[])")
             params.append(selected_types)
-        
-        # Filtro por estados (solo permitidos)
+
+        # Filtro por estados: similar al filtro de tipos
         selected_status = [e for e in selected_status if e in ESTADOS_PERMITIDOS]
         if selected_status:
-            conditions.append("s.estado = ANY(%s)")
+            conditions.append("s.estado = ANY(%s::text[])")
             params.append(selected_status)
 
-        # Construir query final
+        # Construir la consulta final
         final_query = base_query
         if conditions:
             final_query += " AND " + " AND ".join(conditions)
         final_query += " ORDER BY s.fecha_inicio DESC"
 
-        # Obtener datos filtrados
+        # Imprimir en consola para depuración
+        print("DEBUG - Query:", final_query)
+        print("DEBUG - Params:", params)
+
         cur.execute(final_query, params)
         solicitudes = cur.fetchall()
 
-        # Obtener datos para filtros
+        solicitudes_list = [{
+            "id": row[0],
+            "fecha_inicio": row[1],
+            "fecha_fin": row[2],
+            "tipo": row[3],
+            "estado": row[4],
+            "descripcion": row[5],
+            "nombre_usuario": row[6]
+        } for row in solicitudes]
+
+        # Obtener la lista de empleados para el filtro
         cur.execute("SELECT id_uem, nombre_completo FROM colaboradores ORDER BY nombre_completo")
         empleados = cur.fetchall()
 
-        tipos = TIPOS_PERMITIDOS  # Solo tipos permitidos
-        estados = ESTADOS_PERMITIDOS  # Solo estados permitidos
-
-        # Procesar resultados
-        solicitudes_list = [{
-            "mes_anio": row[0],
-            "fecha_inicio": row[1].strftime("%d/%m/%Y") if row[1] else "",
-            "fecha_fin": row[2].strftime("%d/%m/%Y") if row[2] else "",
-            "dias_totales": row[3],
-            "tipo": row[4],
-            "estado": row[5],
-            "descripcion": row[6],
-            "nombre_usuario": row[7]
-        } for row in solicitudes]
-
         return render_template("Admin/historial_empleados_admin.html",
-            solicitudes=solicitudes_list,
-            empleados=empleados,
-            tipos=tipos,
-            estados=estados,
-            selected_ids=selected_ids,
-            selected_types=selected_types,
-            selected_status=selected_status
-        )
+                               solicitudes=solicitudes_list,
+                               empleados=empleados,
+                               tipos=TIPOS_PERMITIDOS,
+                               estados=ESTADOS_PERMITIDOS,
+                               selected_ids=selected_ids,
+                               selected_types=selected_types,
+                               selected_status=selected_status)
 
     except Exception as e:
+        print("Error en historial_empleados_admin:", e)
         return f"Error: {str(e)}"
     finally:
-        if 'cur' in locals(): cur.close()
-        if 'conn' in locals(): conn.close()
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
+
 
 
 @app.route('/generar_contrasena')
@@ -688,7 +687,7 @@ def pedirvacaciones():
         cur.execute("""
             SELECT SUM((fecha_fin - fecha_inicio) :: INTEGER) + COUNT(*)
             FROM solicitudes
-            WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADA'
+            WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADO'
         """, (id_uem,))
         dias_usados = cur.fetchone()[0] or 0
         dias_restantes = max(dias_vacaciones - dias_usados, 0)
@@ -751,7 +750,7 @@ def solicitar_permiso():
         mime_type = archivo.mimetype  # Obtener el tipo MIME
 
         if mime_type not in mime_permitidos or extension not in extensiones_permitidas:
-            flash('❌ Formato no válido. Solo se aceptan JPEG, PNG o PDF.')
+            flash('❌ Formato no válido. Solo se aceptan JPEG, JPG, PNG o PDF.')
             return redirect(url_for('dashboard_empleados'))
 
 
@@ -780,7 +779,7 @@ def solicitar_permiso():
             cur.execute("""
                 SELECT SUM((fecha_fin - fecha_inicio) :: INTEGER) + COUNT(*)
                 FROM solicitudes
-                WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADA'
+                WHERE id_uem = %s AND tipo = 'VACACIONES' AND estado = 'APROBADO'
             """, (id_uem,))
             dias_usados = cur.fetchone()[0] or 0
             dias_restantes = max(dias_vacaciones - dias_usados, 0)
@@ -913,36 +912,40 @@ def historial_empleados():
 
 
 @app.route('/verestatus')
-def verestatus():
+def ver_estatus():  # ✅
     id_uem = session.get('id_uem')
     if not id_uem:
-        return jsonify({"error": "No autorizado"}), 401  # Devuelve un error si no hay sesión
+        return jsonify({"error": "No autorizado"}), 401
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
             SELECT 
-                s.creado_en,  -- Selecciona la columna creado_en
+                s.creado_en,
                 s.tipo,
-                s.estado
+                s.estado,
+                v.comentario AS comentario_admin
             FROM solicitudes s
+            LEFT JOIN validaciones v ON s.id = v.solicitud_id
             WHERE s.id_uem = %s
-            ORDER BY s.creado_en DESC  -- Ordena por la fecha de creación
+            ORDER BY s.creado_en DESC
         """, (id_uem,))
-        solicitudes = cur.fetchall()
-        solicitudes_list = []
-        for row in solicitudes:
-            # Formatea la fecha creado_en incluyendo la hora
-            fecha_formateada = row[0].strftime("%d/%m/%Y %H:%M:%S")  # Formato: dd/mm/yyyy HH:MM:SS
-            solicitudes_list.append({
-                "creado_en": fecha_formateada,  # Usa la fecha y hora formateada
-                "tipo": row[1].strip().upper(),  # Tipo de solicitud
-                "estado": row[2]  # Estado de la solicitud
+        
+        solicitudes = []
+        for row in cur.fetchall():
+            fecha_formateada = row[0].strftime("%d/%m/%Y %H:%M:%S")
+            solicitudes.append({
+                "creado_en": fecha_formateada,
+                "tipo": row[1].strip().upper(),
+                "estado": row[2],
+                "comentario_admin": row[3] if row[3] else "Sin comentario"  # Si no hay comentario, muestra "Sin comentario"
             })
-        return jsonify(solicitudes_list)  # Devuelve los datos en formato JSON
+            
+        return jsonify(solicitudes)
+    
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Devuelve un error en formato JSON
+        return jsonify({"error": str(e)}), 500
     finally:
         if cur:
             cur.close()
@@ -1292,6 +1295,189 @@ def descargar_usuarios():
         if 'conn' in locals():
             conn.close()      
 
+# main.py - Asegurar consulta correcta del justificante
+@app.route('/obtener_justificante/<int:solicitud_id>')
+def obtener_justificante(solicitud_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT justificante, mime_type 
+            FROM (
+                SELECT justificante, 'application/pdf' as mime_type FROM permisos WHERE solicitud_id = %s
+                UNION ALL
+                SELECT justificante, 'image/png' as mime_type FROM incapacidades WHERE solicitud_id = %s
+                UNION ALL
+                SELECT justificante, 'image/jpeg' as mime_type FROM incapacidades WHERE solicitud_id = %s
+            ) AS subquery
+            LIMIT 1
+        """, (solicitud_id, solicitud_id, solicitud_id))
+        
+        resultado = cur.fetchone()
+        
+        if resultado:
+            # Asegúrate de que el justificante sea un objeto binario y lo codifiques correctamente
+            justificante_codificado = base64.b64encode(resultado[0]).decode('utf-8')
+            print(f"Justificante codificado: {justificante_codificado[:100]}...")  # Log para depuración
+            return jsonify({
+                'justificante': justificante_codificado,
+                'mime_type': resultado[1]
+            })
+        
+        return jsonify({'error': 'No encontrado'}), 404
+    except Exception as e:
+        print(f"Error en obtener_justificante: {str(e)}")  # Log para depuración
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
+estados_permitidos = ['PENDIENTE', 'APROBADO', 'RECHAZADO']
+
+@app.route('/actualizar_solicitud/<int:solicitud_id>', methods=['PUT'])
+def actualizar_solicitud(solicitud_id):
+    conn = None
+    cursor = None
+    try:
+        data = request.get_json()
+        # Se requieren 'estado' y 'comentario'. 'motivo_cambio' es opcional.
+        if 'estado' not in data or 'comentario' not in data:
+            return jsonify({"error": "Faltan datos necesarios: 'estado' y/o 'comentario'"}), 400
+
+        estado_nuevo = data['estado']
+        admin_comentario = data['comentario'].strip()
+        motivo_cambio = data.get('motivo_cambio', '').strip()
+
+        # Verificamos que el nuevo estado esté dentro de los permitidos
+        if estado_nuevo not in ['PENDIENTE', 'APROBADO', 'RECHAZADO']:
+            return jsonify({"error": "El estado no es válido para esta solicitud."}), 400
+
+        if 'id_uem' not in session:
+            return jsonify({"error": "No estás autenticado."}), 401
+
+        id_usuario = session['id_uem']
+
+        conn = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor = conn.cursor()
+
+        # Obtener el estado actual de la solicitud
+        cursor.execute("SELECT estado FROM solicitudes WHERE id = %s", (solicitud_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"error": "Solicitud no encontrada."}), 404
+        estado_actual = row[0]
+
+        # Si el estado ya es APROBADO o RECHAZADO y se intenta actualizar con el mismo, no permitir
+        if estado_actual in ['APROBADO', 'RECHAZADO'] and estado_actual == estado_nuevo:
+            mensaje = "Esto ya está validado." if estado_actual == "APROBADO" else "Esto ya está rechazado."
+            return jsonify({"error": mensaje}), 400
+
+        # Verificar si ya existe una validación para esta solicitud por este admin
+        cursor.execute("""
+            SELECT id FROM validaciones
+            WHERE solicitud_id = %s AND id_usuario = %s
+            ORDER BY id ASC LIMIT 1
+        """, (solicitud_id, id_usuario))
+        existing = cursor.fetchone()
+        if existing:
+            # Actualizar la validación existente
+            validation_id = existing[0]
+            cursor.execute("""
+                UPDATE validaciones
+                SET estado_anterior = %s,
+                    estado_nuevo = %s,
+                    comentario = %s,
+                    motivo_cambio = %s,
+                    fecha_validacion = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (estado_actual, estado_nuevo, admin_comentario, motivo_cambio, validation_id))
+        else:
+            # Insertar nueva validación
+            cursor.execute("""
+                INSERT INTO validaciones (solicitud_id, id_usuario, estado_anterior, estado_nuevo, comentario, motivo_cambio)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (solicitud_id, id_usuario, estado_actual, estado_nuevo, admin_comentario, motivo_cambio))
+
+        # Actualizar el estado de la solicitud
+        cursor.execute("""
+            UPDATE solicitudes
+            SET estado = %s
+            WHERE id = %s
+        """, (estado_nuevo, solicitud_id))
+
+        conn.commit()
+        return jsonify({"message": "Solicitud actualizada correctamente."}), 200
+
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+        return jsonify({"error": f"Error al actualizar la solicitud: {str(e)}"}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@app.route('/obtener_validacion/<int:solicitud_id>')
+def obtener_validacion(solicitud_id):
+    if 'id_uem' not in session:
+        return jsonify({"error": "No estás autenticado."}), 401
+    try:
+        conn = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, comentario, motivo_cambio 
+            FROM validaciones 
+            WHERE solicitud_id = %s AND id_usuario = %s
+            ORDER BY id ASC LIMIT 1
+        """, (solicitud_id, session['id_uem']))
+        record = cursor.fetchone()
+        if record:
+            validation_id, comentario, motivo_cambio = record
+            return jsonify({
+                "validation_id": validation_id,
+                "comentario": comentario,
+                "motivo_cambio": motivo_cambio
+            })
+        else:
+            return jsonify({"validation_id": None, "comentario": "", "motivo_cambio": ""})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+
+
+
+# main.py - Nuevo endpoint para contador
+@app.route('/contador_cambios/<int:solicitud_id>')
+def contador_cambios(solicitud_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT COUNT(*) FROM validaciones WHERE solicitud_id = %s
+        """, (solicitud_id,))
+        contador = cur.fetchone()[0]
+        return jsonify({'contador': contador})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# main.py - Modificar el filtro del template
+@app.template_filter('mes_anio')
+def mes_anio_filter(fecha):
+    try:
+        if isinstance(fecha, str):  # Si es string, convertir a datetime
+            fecha = datetime.strptime(fecha, "%d/%m/%Y")
+        return fecha.strftime("%B %Y").capitalize()  # Ej: "Enero 2024"
+    except:
+        return "Fecha inválida"
 
 if __name__ == '__main__':
     app.run(debug=True)
